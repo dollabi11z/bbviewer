@@ -1,5 +1,7 @@
 Big Brother CANADA Viewer 1.07
 ======
+![BBCAViewer 1.07](bbviewer.jpg)
+
 Quad Cam
 	- added Quad Cam (Cam 5)
 	- I recommend sticking to lower quality - for bandwidth and/or cpu purposes
@@ -20,3 +22,23 @@ Media Status
 	- Media status is shown in title bar (Paused, Buffering, Error, etc)
 Built with Air 2.5 SDK
 	- This should allow Linux users to use it if Air 2.6 is installed
+    
+    NOTE: This release should have much better handling of finding the feeds. It will let you know if a specific cam and quality is not available.
+
+AUTO-UPDATERS: Select 'Download', then 'Postpone until restart', close app, then reopen it!
+
+Big Brother CANADA Viewer 1.06
+===========
+- Feed loading improvements
+- Should be a big improvement, I verify links are valid before trying to use them
+- It doesn't mean a specific cam/quality will always work (sometimes there is no valid link)
+- If a particular cam and quality is not available, you will see a message in the window title
+- Video will stop when selecting a new cam or quality
+
+- Saves last used camera and quality
+
+- Chat Improvements
+- Basic Join/Notice/Kick messages added to chat
+- Larger chat font size (for now, looking into letting you adjust later) 
+
+Read more: http://forums.jokersupdates.com/ubbthreads/showthreaded.php?Board=BBCAHelp&Number=19113801#ixzz32doavmnz
