@@ -17,6 +17,7 @@ var bb = {
         //do load stuff here
         bb.season = season;
         bb.getHouseguests();
+        bb.getBookmarks();
         setInterval(function() { bb.getInfo(); }, 1000);
     },
 };
@@ -34,8 +35,8 @@ bb.getInfo = function() {
     if (end.getTime() / 1000 < dsec) bb.currentDayInHouse = "Ended"; 
     var html = '<ul class="list">';
     html += '<li>' + bb.info[bb.season].name + '</li>';
-    html += '<li>' + bb.currentDayInHouse + '</li>';
     html += '<li>' + bb.currentTime + '</li>';
+    html += '<li>' + bb.currentDayInHouse + '</li>';
     html += '</ul>';
     $('#bb_info').html(html);
 }
@@ -46,6 +47,7 @@ bb.getHouseguests = function () {
         success: function(data) {
             houseguests_data = $.parseJSON(data);
             var html = '';
+            //alert('loaded');
             $.each(houseguests_data, function(i, item) {
                 html += '<div class="houseguest">'
                 html += '<a class="tooltip" href="' + item['yt'] + '"><img class="houseguest" width="64" height="64" src="' + bb.img_dir + bb.season + '/' + i + '.jpg" />';
@@ -67,6 +69,24 @@ bb.getHouseguests = function () {
         },
         error: function(xhr, status, error) {
             alert('error loading houseguests');
+        }
+    });
+}
+
+bb.getBookmarks = function () {
+    $.ajax({
+        url: bb.data_dir + bb.season + '/bookmarks.json',
+        success: function(data) {
+            bookmark_data = $.parseJSON(data);
+            var html = '<ul class="list">';
+            $.each(bookmark_data.flashbacks.results, function(i, item) {
+                html += '<li>' + item['event_day'] + ' ' + item['event_time'] + ': ' + item['event_title'] + '</li>';
+            });
+            html += '</ul>';
+            $('#bb_bookmarks').html(html);
+        },
+        error: function(xhr, status, error) {
+            alert('error loading bookmarks');
         }
     });
 }

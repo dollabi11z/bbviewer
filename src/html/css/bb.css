@@ -1,4 +1,17 @@
 
+#bb_bookmarks {
+    display: none;
+    position: absolute;
+    overflow:scroll;
+    height: auto;
+    width: 50%;
+    left: auto;
+    right: auto;
+    bottom: 0;
+    margin: auto;
+    border: 1px dashed #444444;
+}
+
 #bb_houseguests {
     display: none;
     position: absolute;
@@ -8,7 +21,6 @@
     bottom: 0;
     margin: auto;
     border: 1px dashed #444444;
-    z-index: 97;
 }
 
 #bb_info {
@@ -19,7 +31,9 @@
     bottom: 0;
     margin-left: 10px;
     margin-bottom: 10px;
+    padding: 10px;
     border: 1px dashed #444444;
+    background-color: rgba(30,30,30,0.75);
     color: #efefef;
     z-index: 97;
 }
