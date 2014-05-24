@@ -1,0 +1,101 @@
+.play {
+    background: url("../images/controls-player.png") no-repeat -50px 0px;
+}
+
+.play:hover {
+    background: url("../images/controls-player.png") no-repeat -50px -50px;
+}
+
+.pause {
+    background: url("../images/controls-player.png") no-repeat -100px 0px;
+}
+
+.pause:hover {
+    background: url("../images/controls-player.png") no-repeat -100px -50px;
+}
+
+.skipback {
+    background: url("../images/controls-player.png") no-repeat -150px 0px;
+}
+
+.skipback:hover {
+    background: url("../images/controls-player.png") no-repeat -150px -50px;
+}
+
+.rewind {
+    background: url("../images/controls-player.png") no-repeat -200px 0px;
+}
+
+.rewind:hover {
+    background: url("../images/controls-player.png") no-repeat -200px -50px;
+}
+
+.fastforward {
+    background: url("../images/controls-player.png") no-repeat -250px 0px;
+}
+
+.fastforward:hover {
+    background: url("../images/controls-player.png") no-repeat -250px -50px;
+}
+
+.skipforward {
+    background: url("../images/controls-player.png") no-repeat -300px 0px;
+}
+
+.skipforward:hover {
+    background: url("../images/controls-player.png") no-repeat -300px -50px;
+}
+
+.volume {
+    background: url("../images/controls-player.png") no-repeat -350px 0px;
+}
+
+.volume:hover {
+    background: url("../images/controls-player.png") no-repeat -350px -50px;
+}
+
+.volume_mute {
+    background: url("../images/controls-player.png") no-repeat -400px 0px;
+}
+
+.volume_mute:hover {
+    background: url("../images/controls-player.png") no-repeat -400px -50px;
+}
+
+.fullscreen {
+    background: url("../images/controls-player.png") no-repeat -450px 0px;
+}
+
+.fullscreen:hover {
+    background: url("../images/controls-player.png") no-repeat -450px -50px;
+}
+
+.quality_low {
+    width: 75px;
+    background: url("../images/controls-player.png") no-repeat 0px -100px;
+}
+
+.quality_low:hover {
+    width: 75px;
+    background: url("../images/controls-player.png") no-repeat 0px -150px;
+}
+
+.quality_med {
+    width: 75px;
+    background: url("../images/controls-player.png") no-repeat -100px -100px;
+}
+
+.quality_med:hover {
+    width: 75px;
+    background: url("../images/controls-player.png") no-repeat -100px -150px;
+}
+
+.quality_high {
+    width: 75px;
+    background: url("../images/controls-player.png") no-repeat -200px -100px;
+}
+
+.quality_high:hover {
+    width: 75px;
+    background: url("../images/controls-player.png") no-repeat -200px -150px;
+}

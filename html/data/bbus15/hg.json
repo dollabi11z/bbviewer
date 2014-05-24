@@ -1,0 +1,178 @@
+{
+    "1": {
+        "name" : "Aaryn Gries",
+        "age" : "22",
+        "home" : "San Angelo, TX",
+        "job" : "College Student",
+        "yt" : "https://www.youtube.com/watch?v=NEvOXJECogk",
+        "hoh": "4",
+        "pov": "1",
+        "nom": "3",
+        "evicted": 70
+    },
+    "2": {
+        "name" : "Amanda Zuckerman",
+        "age" : "28",
+        "home" : "Boynton Beach, FL",
+        "job" : "Real Estate Agent",
+        "yt" : "https://www.youtube.com/watch?v=mcYUrc5SoNI",
+        "hoh": "0",
+        "pov": "1",
+        "nom": "3",
+        "evicted": 77
+    },
+    "3": {
+        "name" : "Andy Herren",
+        "age" : "26",
+        "home" : "Aurora, IL",
+        "job" : "Professor",
+        "yt" : "https://www.youtube.com/watch?v=hB4HgkXFJzQ",
+        "hoh": "3",
+        "pov": "2",
+        "nom": "1",
+        "winner": true
+    },
+    "4": {
+        "name" : "Candice Stewart",
+        "age" : "29",
+        "home" : "New Orleans, LA",
+        "job" : "Pediatric Speech Therapist",
+        "yt" : "https://www.youtube.com/watch?v=mzDruw_Jbe8",
+        "hoh": "0",
+        "pov": "0",
+        "nom": "3",
+        "evicted": 49
+    },
+    "5": {
+        "name" : "David Girton",
+        "age" : "25",
+        "home" : "San Diego, CA",
+        "job" : "Lifeguard",
+        "yt" : "https://www.youtube.com/watch?v=2ai-waoGkII",
+        "hoh": "0",
+        "pov": "0",
+        "nom": "1",
+        "evicted": 13
+    },
+    "6": {
+        "name" : "Elissa Slater",
+        "age" : "27",
+        "home" : "Concord, NC",
+        "job" : "Nutritionist",
+        "yt" : "",
+        "hoh": "1",
+        "pov": "2",
+        "nom": "5",
+        "evicted": 77
+    },
+    "7": {
+        "name" : "GinaMarie Zimmerman",
+        "age" : "32",
+        "home" : "Brooklyn, NY",
+        "job" : "Pageant Coordinator",
+        "yt" : "https://www.youtube.com/watch?v=lbTSxOYk2bM",
+        "hoh": "2",
+        "pov": "0",
+        "nom": "4",
+        "evicted": "Runner-up"
+    },
+    "8": {
+        "name" : "Helen Kim",
+        "age" : "37",
+        "home" : "Falls Church, VA",
+        "job" : "Political Consultant",
+        "yt" : "",
+        "hoh": "1",
+        "pov": "0",
+        "nom": "2",
+        "evicted": 63
+    },
+    "9": {
+        "name" : "Howard Overby",
+        "age" : "29",
+        "home" : "Hattiesburg, MS",
+        "job" : "Youth Counselor",
+        "yt" : "https://www.youtube.com/watch?v=N_buThtyNb8",
+        "hoh": "0",
+        "pov": "0",
+        "nom": "1",
+        "evicted": 42
+    },
+    "10": {
+        "name" : "Jeremy McGuire",
+        "age" : "23",
+        "home" : "Katy, TX",
+        "job" : "Boat Shop Associate",
+        "yt" : "https://www.youtube.com/watch?v=XJBhZlMQrs0",
+        "hoh": "0",
+        "pov": "1",
+        "nom": "2",
+        "evicted": 28
+    },
+    "11": {
+        "name" : "Jessie Kowalski",
+        "age" : "25",
+        "home" : "Beaumont, TX",
+        "job" : "Unemployed",
+        "yt" : "https://www.youtube.com/watch?v=KgTEccPrDbM",
+        "hoh": "0",
+        "pov": "1",
+        "nom": "4",
+        "evicted": 56
+    },
+    "12": {
+        "name" : "Judd Daugherty",
+        "age" : "26",
+        "home" : "Englewood, TN",
+        "job" : "Property Appraiser",
+        "yt" : "https://www.youtube.com/watch?v=YmpnVogXt9w",
+        "hoh": "1",
+        "pov": "1",
+        "nom": "2",
+        "evicted": "49, 82"
+    },
+    "13": {
+        "name" : "Kaitlin Barnaby",
+        "age" : "23",
+        "home" : "Vadnais Heights, MN",
+        "job" : "Bartender",
+        "yt" : "",
+        "hoh": "0",
+        "pov": "1",
+        "nom": "2",
+        "evicted": 35
+    },
+    "14": {
+        "name" : "McCrae Olson",
+        "age" : "23",
+        "home" : "Oak Grove, MN",
+        "job" : "Pizza Delivery Boy",
+        "yt" : "https://www.youtube.com/watch?v=SjAkGOXX5y0",
+        "hoh": "2",
+        "pov": "3",
+        "nom": "4",
+        "evicted": 84
+    },
+    "15": {
+        "name" : "Nick Uhas",
+        "age" : "28",
+        "home" : "Hilliard, OH",
+        "job" : "Entrepreneur",
+        "yt" : "https://www.youtube.com/watch?v=ECcnf9nCk-M",
+        "hoh": "0",
+        "pov": "0",
+        "nom": "1",
+        "evicted": 21
+    },
+    "16": {
+        "name" : "Spencer Clawson",
+        "age" : "31",
+        "home" : "Conway, AK",
+        "job" : "Railroad Conductor",
+        "yt" : "https://www.youtube.com/watch?v=iZkqlclJRD8",
+        "hoh": "1",
+        "pov": "1",
+        "nom": "9",
+        "evicted": 90
+    }
+}
