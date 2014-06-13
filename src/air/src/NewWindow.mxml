@@ -26,6 +26,7 @@
 		</fx:XMLList>
 	</fx:Declarations>
 	<fx:Script>
+		<![CDATA[
 		import flash.desktop.NativeApplication;
 		import flash.display.NativeWindow;
 		import mx.events.MenuEvent;
@@ -94,7 +95,6 @@
 
 		private function exitApp():void
 			{
-				//video.stopVideo();
 				stage.nativeWindow.close();
 			}
 
@@ -107,8 +107,10 @@
 			{
 				stage.nativeWindow.alwaysInFront = !stage.nativeWindow.alwaysInFront;
 			}
+		
+		]]>
 	</fx:Script>
-	<mx:HTML id="video" width="100%" height="100%" location="http://bigbrother.goodiesfor.me/stage" htmlDOMInitialize="" />
+	<mx:HTML id="web" width="100%" height="100%" location="http://goodiesfor.me/bigbrother/" />
 	<ui:Help id="help" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<mx:MenuBar x="0" y="0" width="100%" id="bbMenu" labelField="@label" itemClick="onMenuItemClick(event)" dataProvider="{menuXMLList}" />
 </s:Group>
