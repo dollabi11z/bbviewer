@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- containers\spark\myComponents\MySimpleCustomItemRenderer.mxml -->
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+    xmlns:mx="library://ns.adobe.com/flex/mx" 
+    xmlns:s="library://ns.adobe.com/flex/spark"
+	width="100%"
+	click="onStreamClick(event)" >
+	<fx:Script>
+		<![CDATA[
+			import flash.events.Event;
+
+			private function onStreamClick(event:Event):void
+			{
+				WindowContent(parentApplication).load( data.url );
+				WindowContent(parentApplication).streamSelect.close();
+			}
+		
+		]]>
+	</fx:Script>
+    <s:states> 
+        <s:State name="normal"/> 
+        <s:State name="hovered"/> 
+    </s:states> 
+    <s:VGroup verticalCenter="1">
+		<s:Label id="streamLabel" height="16" text="{data.label}" verticalAlign="middle" /> 
+	</s:VGroup>
+</s:ItemRenderer>

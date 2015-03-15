@@ -11,11 +11,13 @@
     <movie version="2" />
     <movie minorVersion="6" />
     <movie platform="AIR" />
-    <movie background="#FFFFFF" />
+    <movie background="#000000" />
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
     <class path="src" />
+    <class path="lib\com" />
+    <class path="lib\akamai" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -43,7 +45,7 @@
     <option loadExterns="" />
     <option staticLinkRSL="True" />
     <option additional="" />
-    <option compilerConstants="" />
+    <option compilerConstants="CONFIG::LOGGING,true&#xA;CONFIG::FLASH_10_1,false" />
     <option minorVersion="" />
   </build>
   <!-- SWC Include Libraries -->
@@ -52,7 +54,10 @@
   </includeLibraries>
   <!-- SWC Libraries -->
   <libraryPaths>
-    <!-- example: <element path="..." /> -->
+    <element path="lib\OSMF.swc" />
+    <element path="lib\HLSPlugin.swc" />
+    <element path="lib\MSAdaptiveStreamingPlugin-v1.0.10-osmf2.0.swc" />
+    <element path="lib\AkamaiAdvancedStreamingPlugin-3.4.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>

@@ -2,7 +2,9 @@
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
                xmlns:s="library://ns.adobe.com/flex/spark" 
                xmlns:mx="library://ns.adobe.com/flex/mx"
-			   xmlns:ui="ui.*">
+			   xmlns:local="*.*"
+			   xmlns:ui="ui.*"
+			   creationComplete="init()">
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -10,6 +12,7 @@
 		<fx:XMLList id="menuXML">
 			<menu label="File">
 				<item id="newinstance" label="New Window" />
+				<item id="streams" label="Select Stream" />
 				<item id="exit" label="Exit" />
 			</menu>
 			<menu label="View">
@@ -29,24 +32,221 @@
 	<fx:Script>
 		<![CDATA[
 			import flash.display.NativeWindow;
+			import flash.net.URLRequest;
+			import mx.core.IRawChildrenContainer;
 			import mx.events.MenuEvent;
+			import org.osmf.media.URLResource;
+			
+			import com.akamai.osmf.AkamaiAdvancedStreamingPluginInfo;
+			import com.microsoft.azure.media.AdaptiveStreamingPluginInfo;
+			import org.denivip.osmf.plugins.HLSPluginInfo;
+			import org.denivip.osmf.net.HLSDynamicStreamingResource;
+			
+			import SimpleLoggerFactory;
+			import org.osmf.logging.Log;
+			import org.osmf.utils.OSMFSettings;
+			import org.osmf.containers.MediaContainer;
+			import org.osmf.layout.LayoutMode;
+			import org.osmf.layout.LayoutMetadata;
+			import org.osmf.layout.HorizontalAlign;
+			import org.osmf.layout.VerticalAlign;
+			import org.osmf.display.ScaleMode;
+			import org.osmf.media.MediaPlayer;
+			import org.osmf.media.DefaultMediaFactory;
+			import org.osmf.media.MediaElement;
+			import org.osmf.media.PluginInfoResource;
+			import org.osmf.media.MediaPlayerState;
+			import org.osmf.net.StreamingURLResource;
+			import org.osmf.net.StreamType;
+			import org.osmf.events.MediaFactoryEvent;
+			import org.osmf.events.MediaErrorEvent;
+			import org.osmf.events.MediaPlayerStateChangeEvent;
+			import org.osmf.events.LoadEvent;
+			import mx.events.ResizeEvent;
 			
 			private static const defaultWindowTitle:String = "BBViewer";
 			private var nativeWindow:ExtendedNativeWindow;
+			private var pluginFactory:Object = {};
+			private var mediaPlayer:MediaPlayer;
+			private var container:MediaContainer;
+
+			private function init():void
+			{
+				//addEventListener(ResizeEvent.RESIZE, onResize);
+				
+				Log.loggerFactory = new SimpleLoggerFactory();
+				initPlayer();
+				loadAdaptivePlugins();
+				
+			}
+			
+			/*
+			 * initPlayer
+			 * initialize the media player and media container
+			 */
+			private function initPlayer():void
+			{
+				OSMFSettings.enableStageVideo = false;
+				// player
+				mediaPlayer = new MediaPlayer();
+				mediaPlayer.autoDynamicStreamSwitch = true;
+				mediaPlayer.autoPlay = true;
+				mediaPlayer.addEventListener(MediaErrorEvent.MEDIA_ERROR, onPlayerError);
+				mediaPlayer.addEventListener(MediaPlayerStateChangeEvent.MEDIA_PLAYER_STATE_CHANGE, onPlayerStateChange);
+				mediaPlayer.addEventListener(LoadEvent.LOAD_STATE_CHANGE, onLoadStateChange);
+				// container
+				container = new MediaContainer();
+				videoSprite.addChild(container);
+			}
+			
+			private function loadAdaptivePlugins():void
+			{
+				pluginFactory.hds = new DefaultMediaFactory();
+				pluginFactory.hds.addEventListener( MediaFactoryEvent.PLUGIN_LOAD, onPluginLoaded );
+				pluginFactory.hds.addEventListener( MediaFactoryEvent.PLUGIN_LOAD_ERROR, onPluginError );
+				pluginFactory.hds.loadPlugin( new PluginInfoResource( new AkamaiAdvancedStreamingPluginInfo() ) );
+				
+				pluginFactory.hls = new DefaultMediaFactory();
+				pluginFactory.hls.addEventListener(MediaFactoryEvent.PLUGIN_LOAD, onPluginLoaded);
+				pluginFactory.hls.addEventListener(MediaFactoryEvent.PLUGIN_LOAD_ERROR, onPluginError);
+				pluginFactory.hls.loadPlugin(new PluginInfoResource(new HLSPluginInfo()));
+				
+				pluginFactory.mss = new DefaultMediaFactory();
+				pluginFactory.mss.addEventListener(MediaFactoryEvent.PLUGIN_LOAD, onPluginLoaded);
+				pluginFactory.mss.addEventListener(MediaFactoryEvent.PLUGIN_LOAD_ERROR, onPluginError);
+				pluginFactory.mss.loadPlugin(new PluginInfoResource(new AdaptiveStreamingPluginInfo()));
+
+			}
+			
+			private function onPluginLoaded( event:MediaFactoryEvent ):void
+			{
+				trace( "Adaptive plugin loaded" );
+			}
+			
+			private function onPluginError( event:MediaFactoryEvent ):void
+			{
+				trace( "Error loading adaptive plugin" );
+			}
+			
+			/*
+			 * onPlayerStateChange
+			 * the media player state has changes
+			 */
+			private function onPlayerStateChange( event:MediaPlayerStateChangeEvent ):void
+			{
+				trace( "Player state change" );
+				switch( event.state )
+				{
+					case MediaPlayerState.LOADING:
+						trace( "Media loading" );
+						break;
+					case MediaPlayerState.READY:
+						trace( "Media ready" );
+						if ( mediaPlayer != null && mediaPlayer.isDynamicStream )
+						{
+							trace( "Dynamic Streams:" );
+							for ( var i:Number = 0; i < mediaPlayer.numDynamicStreams; i++ )
+							{
+								trace( " Stream " + i + ": " + mediaPlayer.getBitrateForDynamicStreamIndex(i) );
+							}
+						}
+						//onResize(null);
+						break;
+					case MediaPlayerState.BUFFERING:
+						trace( "Media buffering" );
+						break;
+					case MediaPlayerState.PAUSED:
+						break;
+					case MediaPlayerState.PLAYBACK_ERROR:
+						trace( "Media playback error: " + event.toString() );
+						break;
+				}
+			}
+			
+			/*
+			 * onPlayerError
+			 * the media player throws an error
+			 */
+			private function onPlayerError( event:MediaErrorEvent ):void
+			{
+				trace( "Player error" );
+			}
+			
+			/*
+			 * onLoadStateChange
+			 * the loading state of the media player changed
+			 */
+			private function onLoadStateChange( event:LoadEvent ):void
+			{
+				trace( "Player load state change" );
+			}
+			
+			/*
+			 * onResize
+			 * resize the media container when this object is resized
+			 */
+			public function onResize(event:Event):void {
+				if (container != null) {
+					videoSprite.width = this.width;
+					videoSprite.height = this.height;
+					container.width = videoSprite.width;
+					container.height = videoSprite.height;
+				}
+			}
+			
+			public function load( url:String ):void
+			{
+				var mediaElement:MediaElement;
+				if ( url.indexOf(".f4m") > 0 || url.indexOf(".smil") > 0 || url.indexOf(".flv") > 0 )
+				{
+					//load hds
+					trace( "loading Adobe HDS url" );
+					var hds:StreamingURLResource = new StreamingURLResource( url, StreamType.LIVE_OR_RECORDED );
+					mediaElement = ( pluginFactory.hds as DefaultMediaFactory ).createMediaElement( hds );
+				} else if ( url.indexOf(".ism") > 0 )
+				{
+					trace( "loading Microsoft Smooth Streaming url" );
+					var mss:URLResource = new URLResource( url );
+					//var mss:AdaptiveStreamingDynamicResource = new AdaptiveStreamingDynamicResource( new AdaptiveStreamingManifestInfo( url ) );
+					mediaElement = ( pluginFactory.mss as DefaultMediaFactory ).createMediaElement( mss );
+				} else if ( url.indexOf(".m3u8") > 0 )
+				{
+					trace( "loading Apple HLS url" );
+					//var hls:URLResource = new URLResource( url );
+					var hls:HLSDynamicStreamingResource = new HLSDynamicStreamingResource( url );
+					mediaElement = ( pluginFactory.hls as DefaultMediaFactory ).createMediaElement( hls );
+				}
+				
+				if ( mediaElement != null )
+				{
+					var layout:LayoutMetadata = new LayoutMetadata();
+					layout.percentWidth = 100;
+					layout.percentHeight = 100;
+					layout.scaleMode = ScaleMode.STRETCH;
+					layout.layoutMode = LayoutMode.NONE;
+					layout.verticalAlign = VerticalAlign.MIDDLE;
+					layout.horizontalAlign = HorizontalAlign.CENTER;
+					mediaElement.addMetadata( LayoutMetadata.LAYOUT_NAMESPACE, layout );
+					
+					mediaPlayer.media = mediaElement;
+					container.addMediaElement( mediaElement );
+				}
+			}
 			
 			private function onMenuItemClick(event:MenuEvent):void
 			{
 				//File menu
-				if (event.item.@id == "newinstance") Main.createNativeWindow( stage.nativeWindow.x - 20, stage.nativeWindow.y - 20 );
-				if (event.item.@id == "exit") exitApp();
+				if ( event.item.@id == "newinstance" ) Main.createNativeWindow( stage.nativeWindow.x - 20, stage.nativeWindow.y - 20 );
+				if ( event.item.@id == "streams" ) showStreamSelect();
+				if ( event.item.@id == "exit" ) exitApp();
 				//View menu
-				if (event.item.@id == "sizeSmall") setFixedSize(360, 203);
-				if (event.item.@id == "sizeMed") setFixedSize(480, 270);
-				if (event.item.@id == "sizeLarge") setFixedSize(640, 360);
-				if (event.item.@id == "sizeFullscreen") toggleFullscreen();
-				if (event.item.@id == "ontop") toggleAlwaysOnTop();
+				if ( event.item.@id == "sizeSmall" ) setFixedSize(360, 203);
+				if ( event.item.@id == "sizeMed" ) setFixedSize(480, 270);
+				if ( event.item.@id == "sizeLarge" ) setFixedSize(640, 360);
+				if ( event.item.@id == "sizeFullscreen" ) toggleFullscreen();
+				if ( event.item.@id == "ontop" ) toggleAlwaysOnTop();
 				//Tools menu
-				if (event.item.@id == "help") showHelp();
+				if ( event.item.@id == "help" ) showHelp();
             }
 			
 			private function setFixedSize(w:Number, h:Number):void
@@ -74,6 +274,11 @@
 				}
 			}
 			
+			private function showStreamSelect():void
+			{
+				streamSelect.visible = true;
+			}
+			
 			private function showHelp():void
 			{
 				help.visible = true;
@@ -93,8 +298,14 @@
 			
 		]]>
 	</fx:Script>
-	
+	<s:Group width="100%" height="100%">
+		<s:Rect width="100%" height="100%">
+			<s:fill><s:SolidColor color="0x000000" /></s:fill>
+		</s:Rect>
+		<s:SpriteVisualElement id="videoSprite" width="100%" height="100%" />
+	</s:Group>
 	<ui:Help id="help" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
+	<ui:StreamSelect id="streamSelect" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<mx:MenuBar x="0" y="0" width="100%" id="appMenu" labelField="@label" itemClick="onMenuItemClick(event)" dataProvider="{menuXML}" />
 	
 </s:Group>
