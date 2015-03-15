@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+               xmlns:s="library://ns.adobe.com/flex/spark" 
+               xmlns:mx="library://ns.adobe.com/flex/mx">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		
+		<fx:XMLList id="menuXML">
+			<menu label="File">
+				<item id="newinstance" label="New Window" />
+				<item id="exit" label="Exit" />
+			</menu>
+			<menu label="View">
+				<item id="ontop" label="Always On Top" type="check" />
+				<item id="sizeSmall" label="Small" />
+				<item id="sizeMed" label="Medium" />
+				<item id="sizeLarge" label="Large" />
+				<item id="sizeFullscreen" label="Fullscreen" />
+			</menu>
+		</fx:XMLList>
+		
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.display.NativeWindow;
+			import mx.events.MenuEvent;
+			
+			private static const defaultWindowTitle:String = "BBViewer";
+			private var nativeWindow:ExtendedNativeWindow;
+			
+			private function onMenuItemClick(event:MenuEvent):void
+			{
+				//File menu
+				if (event.item.@id == "newinstance") Main.createNativeWindow( stage.nativeWindow.x - 20, stage.nativeWindow.y - 20 );
+				if (event.item.@id == "exit") exitApp();
+				//View menu
+				if (event.item.@id == "sizeSmall") setFixedSize(360, 203);
+				if (event.item.@id == "sizeMed") setFixedSize(480, 270);
+				if (event.item.@id == "sizeLarge") setFixedSize(640, 360);
+				if (event.item.@id == "sizeFullscreen") toggleFullscreen();
+				if (event.item.@id == "ontop") toggleAlwaysOnTop();
+            }
+			
+			private function setFixedSize(w:Number, h:Number):void
+			{
+				//set the window to a fixed size
+				var chromeWidth:Number = this.stage.nativeWindow.width - this.stage.stageWidth;
+				var chromeHeight:Number = this.stage.nativeWindow.height - this.stage.stageHeight;
+				stage.nativeWindow.width = w + chromeWidth;
+				stage.nativeWindow.height = h + chromeHeight;
+			}
+			
+			private function toggleAlwaysOnTop():void
+			{
+				stage.nativeWindow.alwaysInFront = !stage.nativeWindow.alwaysInFront;
+			}
+			
+			public function toggleFullscreen():void
+			{
+				if (stage.displayState == StageDisplayState.NORMAL)
+				{
+					stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+				} else
+				{
+					stage.displayState = StageDisplayState.NORMAL;
+				}
+			}
+			
+			private function exitApp():void
+			{
+				stage.nativeWindow.close();
+			}
+			
+			public function setWindow(window:ExtendedNativeWindow):void
+			{
+				//update the native window for this window content
+				nativeWindow = window;
+				nativeWindow.title = defaultWindowTitle;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<mx:MenuBar x="0" y="0" width="100%" id="appMenu" labelField="@label" itemClick="onMenuItemClick(event)" dataProvider="{menuXML}" />
+	
+</s:Group>

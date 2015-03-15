@@ -1,10 +1,85 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
                        xmlns:s="library://ns.adobe.com/flex/spark"
-                       xmlns:mx="library://ns.adobe.com/flex/mx">
+                       xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="640"
+					   height="360"
+					   initialize="init()"
+					   showStatusBar="false" >
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
 	
+	<fx:Script>
+		<![CDATA[
+			import flash.events.TimerEvent;
+			import flash.geom.Point;
+			import flash.display.Screen;
+			import flash.system.Capabilities;
+			import flash.display.NativeWindowSystemChrome;
+			import flash.display.NativeWindowInitOptions;
+			import flash.display.StageScaleMode;
+			import flash.display.StageAlign;	
+			import flash.utils.Timer;
+			import mx.core.Window;
+			
+			private static const initialWidth:Number = 640;
+			private static const initialHeight:Number = 360;
+			private var delayTimer:Timer;
+			private var window:ExtendedNativeWindow;
+			
+			private function init():void
+			{
+					nativeWindow.x = ( Capabilities.screenResolutionX / 2 ) - ( nativeWindow.width / 2 );
+					nativeWindow.y = ( Capabilities.screenResolutionY / 2 ) - ( nativeWindow.height / 2 );
+					
+					//launching straight into a new native window tends to cause problems
+					//so we wait a few seconds before opening the first one
+					//use this time to display the splash screen
+					delayTimer = new Timer(5000);
+					delayTimer.addEventListener( TimerEvent.TIMER, onDelayComplete );
+					delayTimer.start();
+			}
+			
+			private function onDelayComplete(event:TimerEvent):void
+			{
+				//now we can close this initial window
+				delayTimer.stop();
+				close();
+				createNativeWindow( ( Screen.mainScreen.bounds.width - initialWidth) / 2, ( Screen.mainScreen.bounds.height - initialHeight) / 2 );
+			}
+			 
+			public static function createNativeWindow( x:int, y:int ):void
+			{
+				//* Set up the NativeWindow options
+				var options:NativeWindowInitOptions = new NativeWindowInitOptions();
+				
+				//* Create the NativeWindow
+				var window:ExtendedNativeWindow = new ExtendedNativeWindow(options);
+				
+				//* Set the height, width and position
+				window.width = initialWidth;
+				window.height = initialHeight;
+				window.minSize = new Point(100, 100);
+				window.x = x;  
+				window.y = y; 
+				window.stage.scaleMode = StageScaleMode.NO_SCALE;
+				window.stage.align = StageAlign.TOP_LEFT;
+				
+				//* Create an instance of the content for the NativeWindow
+				var content:WindowContent = new WindowContent();
+				content.setWindow(window);
+				
+				//* Pass the content into the native window
+				window.addChildControls(content);
+
+				//* Activate the window
+				window.activate();
+			}
+			
+		]]>
+	</fx:Script>
+	<!-- our splash screen loading screen image -->
+	<s:BitmapImage source="@Embed(source='assets/loading.png')" width="640" height="360" />
 </s:WindowedApplication>
