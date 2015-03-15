@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:VGroup
+	   xmlns:fx="http://ns.adobe.com/mxml/2009" 
+	   xmlns:s="library://ns.adobe.com/flex/spark" 
+	   xmlns:mx="library://ns.adobe.com/flex/mx"
+	   xmlns:local="*"
+	   left="0" top="23"
+	   width="80%" height="80%"
+	   clipAndEnableScrolling="true"
+	   verticalCenter="1"
+	   horizontalCenter="1"
+	   addedToStage="init()">
+	
+	<fx:Script>
+		<![CDATA[
+			[Embed(source="../assets/help.html", mimeType="application/octet-stream")]
+			[Bindable]
+			public var helpCls:Class;
+
+			private function init():void
+			{
+				var helptext:String = new helpCls;
+				html.htmlText = helptext;
+			}
+			
+			public function close():void
+			{
+				this.visible = false;
+			}
+
+		]]>
+	</fx:Script>
+	
+	<s:TitleWindow title="Help" width="100%" height="100%" close="close()">
+		<s:VGroup width="100%" height="100%">
+			<mx:HTML id="html" width="100%" height="100%" />
+		</s:VGroup>
+	</s:TitleWindow>
+</s:VGroup>

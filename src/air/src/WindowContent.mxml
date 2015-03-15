@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
                xmlns:s="library://ns.adobe.com/flex/spark" 
-               xmlns:mx="library://ns.adobe.com/flex/mx">
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:ui="ui.*">
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
@@ -17,6 +18,9 @@
 				<item id="sizeMed" label="Medium" />
 				<item id="sizeLarge" label="Large" />
 				<item id="sizeFullscreen" label="Fullscreen" />
+			</menu>
+			<menu label="Tools">
+				<item id="help" label="Help" />
 			</menu>
 		</fx:XMLList>
 		
@@ -41,6 +45,8 @@
 				if (event.item.@id == "sizeLarge") setFixedSize(640, 360);
 				if (event.item.@id == "sizeFullscreen") toggleFullscreen();
 				if (event.item.@id == "ontop") toggleAlwaysOnTop();
+				//Tools menu
+				if (event.item.@id == "help") showHelp();
             }
 			
 			private function setFixedSize(w:Number, h:Number):void
@@ -68,6 +74,11 @@
 				}
 			}
 			
+			private function showHelp():void
+			{
+				help.visible = true;
+			}
+			
 			private function exitApp():void
 			{
 				stage.nativeWindow.close();
@@ -83,6 +94,7 @@
 		]]>
 	</fx:Script>
 	
+	<ui:Help id="help" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<mx:MenuBar x="0" y="0" width="100%" id="appMenu" labelField="@label" itemClick="onMenuItemClick(event)" dataProvider="{menuXML}" />
 	
 </s:Group>
