@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+               xmlns:s="library://ns.adobe.com/flex/spark" 
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+			   creationComplete="init()"
+			   removedFromStage="wrapup()">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import flash.events.Event;
+			import mx.events.ResizeEvent;
+			import SimpleLoggerFactory;
+			import org.osmf.logging.Log;
+			import org.osmf.media.MediaPlayer;
+			import org.osmf.events.MediaErrorEvent;
+			import org.osmf.events.MediaPlayerStateChangeEvent;
+			import org.osmf.utils.OSMFSettings;
+			import org.osmf.containers.MediaContainer;
+			import org.osmf.layout.LayoutMode;
+			import org.osmf.layout.LayoutMetadata;
+			import org.osmf.layout.HorizontalAlign;
+			import org.osmf.layout.VerticalAlign;
+			import org.osmf.display.ScaleMode;
+
+			import org.osmf.media.DefaultMediaFactory;
+			import org.osmf.media.MediaElement;
+			import org.osmf.media.MediaPlayerState;
+			import org.osmf.net.StreamingURLResource;
+			import org.osmf.net.StreamType;
+			import org.osmf.events.LoadEvent;
+			import org.osmf.media.URLResource;
+			import org.denivip.osmf.net.HLSDynamicStreamingResource;
+
+			import flash.events.TimerEvent;
+
+			private var mediaContainer:MediaContainer;
+			private var mediaPlayer:MediaPlayer;
+			private var dataTimer:Timer;
+			private var playerData:VideoDataObject = new VideoDataObject();
+
+			private function init():void
+			{
+				addEventListener(ResizeEvent.RESIZE, onResize);
+				
+				Log.loggerFactory = new SimpleLoggerFactory();
+				initPlayer();
+
+				//timer used to passed data about the video to interested listeners
+				dataTimer = new Timer( 250, 0 );
+				dataTimer.addEventListener( TimerEvent.TIMER, notifyDataListeners );
+				dataTimer.start();
+			}
+			
+			private function wrapup():void
+			{
+				try
+				{
+					dataTimer.stop();
+					stopVideo();
+				} catch ( err:Error )
+				{
+					trace( "couldn't finish wrapup" );
+				}
+			}
+			
+			/*
+			 * initPlayer
+			 * initialize the media player and media container
+			 */
+			private function initPlayer():void
+			{
+				OSMFSettings.enableStageVideo = false;
+				// player
+				mediaPlayer = new MediaPlayer();
+				mediaPlayer.autoDynamicStreamSwitch = true;
+				mediaPlayer.autoPlay = true;
+				mediaPlayer.addEventListener(MediaErrorEvent.MEDIA_ERROR, onPlayerError);
+				mediaPlayer.addEventListener(MediaPlayerStateChangeEvent.MEDIA_PLAYER_STATE_CHANGE, onPlayerStateChange);
+				mediaPlayer.addEventListener(LoadEvent.LOAD_STATE_CHANGE, onLoadStateChange);
+				// container
+				mediaContainer = new MediaContainer();
+				videoContainer.addChild(mediaContainer);
+			}
+
+			/*
+			 * onPlayerStateChange
+			 * the media player state has changes
+			 */
+			private function onPlayerStateChange( event:MediaPlayerStateChangeEvent ):void
+			{
+				trace( "Player state change" );
+				switch( event.state )
+				{
+					case MediaPlayerState.LOADING:
+						trace( "Media loading" );
+						break;
+					case MediaPlayerState.READY:
+						trace( "Media ready" );
+						if ( mediaPlayer != null )
+						{
+							onResize(null);
+							
+							( parentApplication as WindowContent ).playerControls.setControlState("play", true );
+							( parentApplication as WindowContent ).playerControls.setControlState("back", true );
+							( parentApplication as WindowContent ).playerControls.setControlState("forward", true );
+							( parentApplication as WindowContent ).playerControls.setControlState("jumpback", true );
+							( parentApplication as WindowContent ).playerControls.setControlState("jumpforward", true );
+							( parentApplication as WindowContent ).playerControls.setControlState("slider", true );
+							
+							if ( mediaPlayer.isDynamicStream )
+							{
+								trace( "Dynamic Streams:" );
+								for ( var i:Number = 0; i < mediaPlayer.numDynamicStreams; i++ )
+								{
+									trace( " Stream " + i + ": " + mediaPlayer.getBitrateForDynamicStreamIndex(i) );
+								}
+							}
+						}
+						break;
+					case MediaPlayerState.PLAYING:
+						break;
+					case MediaPlayerState.BUFFERING:
+						break;
+					case MediaPlayerState.PAUSED:
+						break;
+					case MediaPlayerState.PLAYBACK_ERROR:
+						trace( "Media playback error: " + event.toString() );
+						break;
+				}
+			}
+			
+			/*
+			 * onPlayerError
+			 * the media player throws an error
+			 */
+			private function onPlayerError( event:MediaErrorEvent ):void
+			{
+				trace( "Player error" );
+			}
+			
+			/*
+			 * onLoadStateChange
+			 * the loading state of the media player changed
+			 */
+			private function onLoadStateChange( event:LoadEvent ):void
+			{
+				trace( "Player load state change" );
+				
+			}
+			
+			public function load( url:String ):void
+			{
+				var mediaElement:MediaElement;
+				if ( url.indexOf(".f4m") > 0 || url.indexOf(".smil") > 0 || url.indexOf(".flv") > 0 )
+				{
+					//load hds
+					trace( "loading Adobe HDS url" );
+					var hds:StreamingURLResource = new StreamingURLResource( url, StreamType.LIVE_OR_RECORDED );
+					mediaElement = ( Main.pluginFactory.hds as DefaultMediaFactory ).createMediaElement( hds );
+				} else if ( url.indexOf(".ism") > 0 )
+				{
+					trace( "loading Microsoft Smooth Streaming url" );
+					var mss:URLResource = new URLResource( url );
+					//var mss:AdaptiveStreamingDynamicResource = new AdaptiveStreamingDynamicResource( new AdaptiveStreamingManifestInfo( url ) );
+					mediaElement = ( Main.pluginFactory.mss as DefaultMediaFactory ).createMediaElement( mss );
+				} else if ( url.indexOf(".m3u8") > 0 )
+				{
+					trace( "loading Apple HLS url" );
+					//var hls:URLResource = new URLResource( url );
+					var hls:HLSDynamicStreamingResource = new HLSDynamicStreamingResource( url );
+					mediaElement = ( Main.pluginFactory.hls as DefaultMediaFactory ).createMediaElement( hls );
+				}
+				
+				if ( mediaElement != null )
+				{
+					var layout:LayoutMetadata = new LayoutMetadata();
+					layout.percentWidth = 100;
+					layout.percentHeight = 100;
+					layout.scaleMode = ScaleMode.LETTERBOX;
+					layout.layoutMode = LayoutMode.NONE;
+					layout.verticalAlign = VerticalAlign.MIDDLE;
+					layout.horizontalAlign = HorizontalAlign.CENTER;
+					mediaElement.addMetadata( LayoutMetadata.LAYOUT_NAMESPACE, layout );
+					
+					mediaPlayer.media = mediaElement;
+					mediaContainer.addMediaElement( mediaElement );
+				}
+			}
+			
+			public function onResize( event:Event ):void
+			{
+				if (mediaContainer != null) {
+					videoContainer.width = this.width;
+					videoContainer.height = this.height;
+					mediaContainer.width = videoContainer.width;
+					mediaContainer.height = videoContainer.height;
+				}
+			}
+			public function seek( toSecs:Number ):void
+			{
+				if ( mediaPlayer != null && mediaPlayer.media != null ) mediaPlayer.seek( toSecs );
+			}
+			
+			public function backwards( secs:Number ):void
+			{
+				if ( mediaPlayer != null && mediaPlayer.media != null ) mediaPlayer.seek( mediaPlayer.currentTime - secs );
+			}
+			
+			public function forward( secs:Number ):void
+			{
+				if ( mediaPlayer != null && mediaPlayer.media != null ) mediaPlayer.seek( mediaPlayer.currentTime + secs );
+			}
+			
+			public function pause():void
+			{
+				trace( "pause: " + mediaPlayer.playing );
+				if ( mediaPlayer.playing ) mediaPlayer.pause();
+			}
+			
+			public function play():void
+			{
+				if ( mediaPlayer.paused ) mediaPlayer.play();
+			}
+			
+			private function stopVideo():void
+			{
+				if ( mediaPlayer.playing ) mediaPlayer.stop();
+			}
+			
+			//we send video data to interested listeners every second
+			private function notifyDataListeners( event:TimerEvent ):void
+			{
+				playerData.playing = mediaPlayer.playing;
+				playerData.seeking = mediaPlayer.seeking;
+				playerData.paused = mediaPlayer.paused;
+				playerData.buffering = mediaPlayer.buffering;
+				playerData.currentTime = mediaPlayer.currentTime;
+				playerData.displayTime = Helper.convertToHHMMSS( mediaPlayer.currentTime ) + " / " + Helper.convertToHHMMSS( mediaPlayer.duration );
+				playerData.duration = mediaPlayer.duration;
+				playerData.bufferTime = mediaPlayer.bufferTime;
+				playerData.autoDynamicStreamSwitch = mediaPlayer.autoDynamicStreamSwitch;
+				playerData.currentDynamicStreamIndex = mediaPlayer.currentDynamicStreamIndex;
+				
+				( parentApplication as WindowContent ).playerControls.onData( playerData );
+			}
+			
+		]]>
+	</fx:Script>	
+	<s:Rect width="100%" height="100%">
+		<s:fill><s:SolidColor color="0x000000" /></s:fill>
+	</s:Rect>
+	<s:SpriteVisualElement id="videoContainer" width="100%" height="100%" />
+</s:Group>

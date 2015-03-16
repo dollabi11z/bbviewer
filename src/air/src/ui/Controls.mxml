@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+               xmlns:s="library://ns.adobe.com/flex/spark" 
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:local="*"
+			   xmlns:ui="ui.*"
+			   explicitHeight="56">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->		
+	</fx:Declarations>
+
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.events.MouseEvent;
+			import org.osmf.media.MediaPlayerState;
+			import flash.filters.DropShadowFilter;
+			import flash.events.Event;
+			
+			private static const SKIP_SHORT:Number = 15;
+			private static const SKIP_LONG:Number = 60;
+			
+			private var mIsDragging:Boolean = false;
+			private var mProgressPosition:Number;
+			private var lastVideoData:VideoDataObject;
+			
+			//update controls based on state change
+			public function onData( data:VideoDataObject ):void
+			{
+				lastVideoData = data;
+				if ( data.playing )
+				{	
+					play.visible = false;
+					pause.visible = true;
+					var maxDistance:Number = ( slider.width - ( slidercontrol.width / 2 ) );
+					sliderprogress.width =  maxDistance * ( data.currentTime / data.duration );
+					if ( !mIsDragging && !data.seeking )
+					{
+						//update the slider control location
+						slidercontrol.x = sliderprogress.width - ( slidercontrol.width / 2 );
+					}
+				} else if ( data.paused )
+				{
+					pause.visible = false;
+					play.visible = true;
+				}
+				txtState.text = data.displayTime;
+			}
+			
+			public function startProgressDrag( event:MouseEvent ):void
+			{
+				mProgressPosition = slidercontrol.x;
+				mIsDragging = true;
+				doProgressDrag( event );
+			}
+			
+			public function doProgressDrag( event:MouseEvent ):void
+			{
+				if ( mIsDragging ) slidercontrol.x = event.stageX - ( slidercontrol.width / 2 );
+			}
+			
+			public function endProgressDrag( event:MouseEvent ):void
+			{
+				doProgressDrag( event );
+				sliderprogress.width = event.stageX;
+				mIsDragging = false;
+				
+				var seekSecs:Number = ( event.stageX / slider.width ) * lastVideoData.duration;
+				( parentApplication as WindowContent ).video.seek( seekSecs );
+			}
+			
+			public function setControlState( control:String, enabled:Boolean ):void
+			{
+				if ( enabled )
+				{
+					switch( control )
+					{
+						case "play":
+						case "pause":
+							play.enabled = enabled;
+							pause.enabled = enabled;
+							break;
+						case "back":
+							back.enabled = enabled;
+							break;
+						case "forward":
+							forward.enabled = enabled;
+							break;
+						case "jumpback":
+							jumpback.enabled = enabled;
+							break;
+						case "jumpforward":
+							jumpforward.enabled = enabled;
+							break;
+						case "slider":
+							slider.enabled = enabled;
+							slidercontrol.enabled = enabled;
+							break;
+					}
+				}
+			}
+		]]>
+	</fx:Script>
+	<!-- Background -->
+	<s:Rect width="100%" height="56">
+		<s:fill><s:SolidColor color="0x1B1B1B" /></s:fill>
+	</s:Rect>
+	
+	<!-- Slider controls -->
+	<s:Group id="slider" width="100%" height="24" top="-5"
+			mouseDown="startProgressDrag(event)"
+			mouseMove="doProgressDrag(event)"
+			mouseUp="endProgressDrag(event)"
+			enabled="false"
+			>
+		<s:Rect id="sliderbar" width="100%" height="8" verticalCenter="1">
+			<s:fill><s:SolidColor color="0x666666" /></s:fill>
+		</s:Rect>
+		<s:Rect id="sliderprogress" width="0" height="8" verticalCenter="1">
+			<s:fill><s:SolidColor color="0x993333" /></s:fill>
+		</s:Rect>
+		<ui:ImageButton id="slidercontrol" 
+			width="24" height="24"
+			skinClass="ui.ImageButtonSkin"
+			image="@Embed(source='../assets/images/sliderbutton_normal.png')"
+			imageDown="@Embed(source='../assets/images/sliderbutton_down.png')"
+			imageOver="@Embed(source='../assets/images/sliderbutton_over.png')"
+			imageDisabled="@Embed(source='../assets/images/sliderbutton_disabled.png')"
+			verticalCenter="1"
+			enabled="false"
+			/>
+	</s:Group>
+	
+	<!-- Play controls -->
+	<s:Group height="32" top="24">
+		<s:HGroup verticalCenter="1">
+			<s:Group>
+				<ui:ImageButton id="pause" click="parentApplication.video.pause()"
+					visible="false"
+					width="32" height="32"
+					skinClass="ui.ImageButtonSkin"
+					image="@Embed(source='../assets/images/pause_normal.png')"
+					imageDown="@Embed(source='../assets/images/pause_down.png')"
+					imageOver="@Embed(source='../assets/images/pause_over.png')"
+					imageDisabled="@Embed(source='../assets/images/pause_disabled.png')"
+					enabled="false"
+					/>
+				<ui:ImageButton id="play" click="parentApplication.video.play()"
+					width="32" height="32"
+					skinClass="ui.ImageButtonSkin"
+					image="@Embed(source='../assets/images/play_normal.png')"
+					imageDown="@Embed(source='../assets/images/play_down.png')"
+					imageOver="@Embed(source='../assets/images/play_over.png')"
+					imageDisabled="@Embed(source='../assets/images/play_disabled.png')"
+					enabled="false"
+					/>
+			</s:Group>
+			<ui:ImageButton id="back" click="parentApplication.video.backwards(SKIP_LONG)"
+				width="32" height="32"
+				skinClass="ui.ImageButtonSkin"
+				image="@Embed(source='../assets/images/back_normal.png')"
+				imageDown="@Embed(source='../assets/images/back_down.png')"
+				imageOver="@Embed(source='../assets/images/back_over.png')"
+				imageDisabled="@Embed(source='../assets/images/back_disabled.png')" />
+			<ui:ImageButton id="forward" click="parentApplication.video.forward(SKIP_LONG)"
+				width="32" height="32"
+				skinClass="ui.ImageButtonSkin"
+				image="@Embed(source='../assets/images/forward_normal.png')"
+				imageDown="@Embed(source='../assets/images/forward_down.png')"
+				imageOver="@Embed(source='../assets/images/forward_over.png')"
+				imageDisabled="@Embed(source='../assets/images/forward_disabled.png')" />	
+			<ui:ImageButton id="jumpback" click="parentApplication.video.backwards(SKIP_SHORT)"
+				width="32" height="32"
+				skinClass="ui.ImageButtonSkin"
+				image="@Embed(source='../assets/images/jumpback_normal.png')"
+				imageDown="@Embed(source='../assets/images/jumpback_down.png')"
+				imageOver="@Embed(source='../assets/images/jumpback_over.png')"
+				imageDisabled="@Embed(source='../assets/images/jumpback_disabled.png')" />
+			<ui:ImageButton id="jumpforward" click="parentApplication.video.forward(SKIP_SHORT)"
+				width="32" height="32"
+				skinClass="ui.ImageButtonSkin"
+				image="@Embed(source='../assets/images/jumpforward_normal.png')"
+				imageDown="@Embed(source='../assets/images/jumpforward_down.png')"
+				imageOver="@Embed(source='../assets/images/jumpforward_over.png')"
+				imageDisabled="@Embed(source='../assets/images/jumpforward_disabled.png')" />
+			<mx:Text id="txtState"
+				focusEnabled="false"
+				text=""
+				width="96"
+				styleName="videotime"
+				filters="{[new DropShadowFilter(2, 33)]}"
+				/>
+			<ui:ImageButton id="settings" click="parentApplication.toggleSettings()" right="0"
+				width="32" height="32"
+				skinClass="ui.ImageButtonSkin"
+				image="@Embed(source='../assets/images/settings_normal.png')"
+				imageDown="@Embed(source='../assets/images/settings_down.png')"
+				imageOver="@Embed(source='../assets/images/settings_over.png')"
+				imageDisabled="@Embed(source='../assets/images/settings_disabled.png')" />
+			<ui:ImageButton id="fullscreen" click="parentApplication.toggleFullscreen()" right="0"
+				width="32" height="32"
+				skinClass="ui.ImageButtonSkin"
+				image="@Embed(source='../assets/images/fullscreen_normal.png')"
+				imageDown="@Embed(source='../assets/images/fullscreen_down.png')"
+				imageOver="@Embed(source='../assets/images/fullscreen_over.png')"
+				imageDisabled="@Embed(source='../assets/images/fullscreen_disabled.png')" />
+		</s:HGroup>
+	</s:Group>
+</s:Group>

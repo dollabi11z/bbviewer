@@ -17,6 +17,7 @@
 		<![CDATA[
 			import mx.collections.ArrayCollection;
 			import streams.TestVideos;
+			import StreamObject;
 			
 			[ Bindable ] private var channelInterfaces:ArrayCollection = new ArrayCollection();
 			[ Bindable ] private var availableStreams:ArrayCollection = new ArrayCollection();
@@ -37,7 +38,11 @@
 						var streams:Object = channelInterfaces[i].getStreams();
 						for each( var stream:Object in streams )
 						{
-							availableStreams.addItem( stream );
+							var item:StreamObject = new StreamObject();
+								item.label = stream.label;
+								item.desc = stream.desc;
+								item.url = stream.url;
+							availableStreams.addItem( item );
 						}
 					}
 				}

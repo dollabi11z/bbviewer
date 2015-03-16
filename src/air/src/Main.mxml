@@ -10,6 +10,23 @@
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
 	</fx:Declarations>
+		
+	<fx:Style>
+		@namespace s "library://ns.adobe.com/flex/spark";
+		@namespace mx "library://ns.adobe.com/flex/mx";
+		
+		@font-face { 
+			src: url("assets/fonts/UBUNTU-R.TTF"); 
+			fontFamily: UbuntuFont; 
+			embedAsCFF: false; 
+		}
+		
+		.videotime {
+			fontFamily: UbuntuFont;
+            fontSize: 10;
+            color: #dfdfdf;
+        }
+	</fx:Style>
 	
 	<fx:Script>
 		<![CDATA[
@@ -23,23 +40,64 @@
 			import flash.display.StageAlign;	
 			import flash.utils.Timer;
 			import mx.core.Window;
+			import org.osmf.events.MediaFactoryEvent;
+			import org.osmf.media.DefaultMediaFactory;
+			import org.osmf.media.PluginInfoResource;
+			import com.akamai.osmf.AkamaiAdvancedStreamingPluginInfo;
+			import com.microsoft.azure.media.AdaptiveStreamingPluginInfo;
+			import org.denivip.osmf.plugins.HLSPluginInfo;
 			
 			private static const initialWidth:Number = 640;
 			private static const initialHeight:Number = 360;
 			private var delayTimer:Timer;
 			private var window:ExtendedNativeWindow;
 			
+			public static var pluginFactory:Object = {};
+
 			private function init():void
 			{
 					nativeWindow.x = ( Capabilities.screenResolutionX / 2 ) - ( nativeWindow.width / 2 );
 					nativeWindow.y = ( Capabilities.screenResolutionY / 2 ) - ( nativeWindow.height / 2 );
-					
+		
+					//load the plugins so they will be available to all windows
+					loadAdaptivePlugins();
+
 					//launching straight into a new native window tends to cause problems
 					//so we wait a few seconds before opening the first one
 					//use this time to display the splash screen
 					delayTimer = new Timer(5000);
 					delayTimer.addEventListener( TimerEvent.TIMER, onDelayComplete );
 					delayTimer.start();
+			}
+			
+			
+			private function loadAdaptivePlugins():void
+			{
+				pluginFactory.hds = new DefaultMediaFactory();
+				pluginFactory.hds.addEventListener( MediaFactoryEvent.PLUGIN_LOAD, onPluginLoaded );
+				pluginFactory.hds.addEventListener( MediaFactoryEvent.PLUGIN_LOAD_ERROR, onPluginError );
+				pluginFactory.hds.loadPlugin( new PluginInfoResource( new AkamaiAdvancedStreamingPluginInfo() ) );
+				
+				pluginFactory.hls = new DefaultMediaFactory();
+				pluginFactory.hls.addEventListener(MediaFactoryEvent.PLUGIN_LOAD, onPluginLoaded);
+				pluginFactory.hls.addEventListener(MediaFactoryEvent.PLUGIN_LOAD_ERROR, onPluginError);
+				pluginFactory.hls.loadPlugin(new PluginInfoResource(new HLSPluginInfo()));
+				
+				pluginFactory.mss = new DefaultMediaFactory();
+				pluginFactory.mss.addEventListener(MediaFactoryEvent.PLUGIN_LOAD, onPluginLoaded);
+				pluginFactory.mss.addEventListener(MediaFactoryEvent.PLUGIN_LOAD_ERROR, onPluginError);
+				pluginFactory.mss.loadPlugin(new PluginInfoResource(new AdaptiveStreamingPluginInfo()));
+
+			}
+			
+			private function onPluginLoaded( event:MediaFactoryEvent ):void
+			{
+				trace( "Adaptive plugin loaded" );
+			}
+			
+			private function onPluginError( event:MediaFactoryEvent ):void
+			{
+				trace( "Error loading adaptive plugin" );
 			}
 			
 			private function onDelayComplete(event:TimerEvent):void
@@ -81,5 +139,5 @@
 		]]>
 	</fx:Script>
 	<!-- our splash screen loading screen image -->
-	<s:BitmapImage source="@Embed(source='assets/loading.png')" width="640" height="360" />
+	<s:BitmapImage source="@Embed(source='assets/images/loading.png')" width="640" height="360" />
 </s:WindowedApplication>

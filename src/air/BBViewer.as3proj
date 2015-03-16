@@ -45,7 +45,7 @@
     <option loadExterns="" />
     <option staticLinkRSL="True" />
     <option additional="" />
-    <option compilerConstants="CONFIG::LOGGING,true&#xA;CONFIG::FLASH_10_1,false" />
+    <option compilerConstants="CONFIG::LOGGING,false&#xA;CONFIG::FLASH_10_1,false" />
     <option minorVersion="" />
   </build>
   <!-- SWC Include Libraries -->
@@ -73,7 +73,60 @@
   </intrinsics>
   <!-- Assets to embed into the output SWF -->
   <library>
-    <!-- example: <asset path="..." id="..." update="..." glyphs="..." mode="..." place="..." sharepoint="..." /> -->
+    <asset path="src\assets\images\back_disabled.png" />
+    <asset path="src\assets\images\back_down.png" />
+    <asset path="src\assets\images\back_normal.png" />
+    <asset path="src\assets\images\back_over.png" />
+    <asset path="src\assets\images\forward_disabled.png" />
+    <asset path="src\assets\images\forward_down.png" />
+    <asset path="src\assets\images\forward_normal.png" />
+    <asset path="src\assets\images\forward_over.png" />
+    <asset path="src\assets\images\fullscreen_disabled.png" />
+    <asset path="src\assets\images\fullscreen_down.png" />
+    <asset path="src\assets\images\fullscreen_normal.png" />
+    <asset path="src\assets\images\fullscreen_over.png" />
+    <asset path="src\assets\images\jumpback_disabled.png" />
+    <asset path="src\assets\images\jumpback_down.png" />
+    <asset path="src\assets\images\jumpback_normal.png" />
+    <asset path="src\assets\images\jumpback_over.png" />
+    <asset path="src\assets\images\jumpforward_disabled.png" />
+    <asset path="src\assets\images\jumpforward_down.png" />
+    <asset path="src\assets\images\jumpforward_normal.png" />
+    <asset path="src\assets\images\jumpforward_over.png" />
+    <asset path="src\assets\images\loading.png" />
+    <asset path="src\assets\images\mute_disabled.png" />
+    <asset path="src\assets\images\mute_down.png" />
+    <asset path="src\assets\images\mute_normal.png" />
+    <asset path="src\assets\images\mute_over.png" />
+    <asset path="src\assets\images\pause_disabled.png" />
+    <asset path="src\assets\images\pause_down.png" />
+    <asset path="src\assets\images\pause_normal.png" />
+    <asset path="src\assets\images\pause_over.png" />
+    <asset path="src\assets\images\pin_disabled.png" />
+    <asset path="src\assets\images\pin_down.png" />
+    <asset path="src\assets\images\pin_normal.png" />
+    <asset path="src\assets\images\pin_over.png" />
+    <asset path="src\assets\images\play_disabled.png" />
+    <asset path="src\assets\images\play_down.png" />
+    <asset path="src\assets\images\play_normal.png" />
+    <asset path="src\assets\images\play_over.png" />
+    <asset path="src\assets\images\settings_disabled.png" />
+    <asset path="src\assets\images\settings_down.png" />
+    <asset path="src\assets\images\settings_normal.png" />
+    <asset path="src\assets\images\settings_over.png" />
+    <asset path="src\assets\images\sliderbutton_disabled.png" />
+    <asset path="src\assets\images\sliderbutton_down.png" />
+    <asset path="src\assets\images\sliderbutton_normal.png" />
+    <asset path="src\assets\images\sliderbutton_over.png" />
+    <asset path="src\assets\images\unpin_disabled.png" />
+    <asset path="src\assets\images\unpin_down.png" />
+    <asset path="src\assets\images\unpin_normal.png" />
+    <asset path="src\assets\images\unpin_over.png" />
+    <asset path="src\assets\images\volume_disabled.png" />
+    <asset path="src\assets\images\volume_down.png" />
+    <asset path="src\assets\images\volume_normal.png" />
+    <asset path="src\assets\images\volume_over.png" />
+    <asset path="src\assets\font\UBUNTU-R.TTF" />
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
