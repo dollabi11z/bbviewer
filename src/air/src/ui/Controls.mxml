@@ -4,7 +4,7 @@
                xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:local="*"
 			   xmlns:ui="ui.*"
-			   explicitHeight="56">
+			   height="56">
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->		
@@ -17,6 +17,7 @@
 			import org.osmf.media.MediaPlayerState;
 			import flash.filters.DropShadowFilter;
 			import flash.events.Event;
+			import objects.VideoDataObject;
 			
 			private static const SKIP_SHORT:Number = 15;
 			private static const SKIP_LONG:Number = 60;
@@ -102,6 +103,9 @@
 			}
 		]]>
 	</fx:Script>
+	
+	<ui:AlternateAngles id="playerAngles" width="100%" top="-50" visible="false" />
+
 	<!-- Background -->
 	<s:Rect width="100%" height="56">
 		<s:fill><s:SolidColor color="0x1B1B1B" /></s:fill>
@@ -188,7 +192,7 @@
 				focusEnabled="false"
 				text=""
 				width="96"
-				styleName="videotime"
+				styleName="smallText"
 				filters="{[new DropShadowFilter(2, 33)]}"
 				/>
 			<ui:ImageButton id="settings" click="parentApplication.toggleSettings()" right="0"

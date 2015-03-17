@@ -1,4 +1,4 @@
-package 
+package objects 
 {
 	/**
 	 * ...
@@ -14,8 +14,11 @@ package
 		public var bufferTime:Number;
 		public var duration:Number;
 		public var displayTime:String;
+		public var isDynamicStream:Boolean;
 		public var autoDynamicStreamSwitch:Boolean;
 		public var currentDynamicStreamIndex:Number;
+		public var numDynamicStreams:Number;
+		public var bitratesForDynamicStreams:Array = new Array();
 	}
 
 }

@@ -18,6 +18,8 @@
     <class path="src" />
     <class path="lib\com" />
     <class path="lib\akamai" />
+    <class path="lib\org" />
+    <class path="lib" />
   </classpaths>
   <!-- Build options -->
   <build>
@@ -127,6 +129,16 @@
     <asset path="src\assets\images\volume_normal.png" />
     <asset path="src\assets\images\volume_over.png" />
     <asset path="src\assets\font\UBUNTU-R.TTF" />
+    <asset path="src\assets\images\toggle_on.png" />
+    <asset path="src\assets\images\toggle_off.png" />
+    <asset path="bin\icons\BBViewer128.png" />
+    <asset path="bin\icons\BBViewer16.png" />
+    <asset path="bin\icons\BBViewer32.png" />
+    <asset path="bin\icons\BBViewer48.png" />
+    <asset path="src\assets\icons\BBViewer128.png" />
+    <asset path="src\assets\icons\BBViewer16.png" />
+    <asset path="src\assets\icons\BBViewer32.png" />
+    <asset path="src\assets\icons\BBViewer48.png" />
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
@@ -142,7 +154,7 @@
   <postBuildCommand alwaysRun="False" />
   <!-- Other project options -->
   <options>
-    <option showHiddenPaths="False" />
+    <option showHiddenPaths="True" />
     <option testMovie="Custom" />
     <option testMovieCommand="Run.bat" />
   </options>

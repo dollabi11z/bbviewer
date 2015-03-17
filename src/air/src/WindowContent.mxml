@@ -12,7 +12,7 @@
 		<fx:XMLList id="menuXML">
 			<menu label="File">
 				<item id="newinstance" label="New Window" />
-				<item id="streams" label="Select Stream" />
+				<item id="channels" label="Channels" />
 				<item id="exit" label="Exit" />
 			</menu>
 			<menu label="View">
@@ -52,7 +52,7 @@
 			{
 				//File menu
 				if ( event.item.@id == "newinstance" ) Main.createNativeWindow( stage.nativeWindow.x - 20, stage.nativeWindow.y - 20 );
-				if ( event.item.@id == "streams" ) showStreamSelect();
+				if ( event.item.@id == "channels" ) showChannels();
 				if ( event.item.@id == "exit" ) exitApp();
 				//View menu
 				if ( event.item.@id == "sizeSmall" ) setFixedSize(360, 203);
@@ -73,7 +73,7 @@
 				stage.nativeWindow.height = h + chromeHeight;
 			}
 
-			private function toggleAlwaysOnTop():void
+			public function toggleAlwaysOnTop():void
 			{
 				stage.nativeWindow.alwaysInFront = !stage.nativeWindow.alwaysInFront;
 			}
@@ -94,9 +94,9 @@
 				}
 			}
 			
-			private function showStreamSelect():void
+			private function showChannels():void
 			{
-				streamSelect.visible = true;
+				channels.visible = true;
 			}
 			
 			private function showHelp():void
@@ -122,7 +122,7 @@
 	<ui:Controls id="playerControls" width="100%" bottom="0" />
 	<ui:Settings id="playerSettings" bottom="61" right="10" visible="false" />
 	<ui:Help id="help" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
-	<ui:StreamSelect id="streamSelect" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
+	<ui:Channels id="channels" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<mx:MenuBar x="0" y="0" width="100%" id="appMenu" labelField="@label" itemClick="onMenuItemClick(event)" dataProvider="{menuXML}" />
 	
 </s:Group>

@@ -14,11 +14,82 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import objects.VideoDataObject;
 			
+			[Embed(source = "../assets/images/toggle_off.png")]
+			[ Bindable ]
+			public var toggle_off:Class;
+			[Embed(source = "../assets/images/toggle_on.png")]
+			[ Bindable ]
+			public var toggle_on:Class;
+			[ Bindable ]
+			private var bitrates:ArrayCollection = new ArrayCollection();
+			private var lastData:VideoDataObject = new VideoDataObject();
+			private var isAuto:Boolean = true;
+			
+			public function onData( data:VideoDataObject ):void
+			{
+				if ( data.playing && ( bitrates.length == 0 || data.numDynamicStreams != lastData.numDynamicStreams ) )
+				{
+					//update bitrates
+					bitrates.removeAll();
+					for ( var i:Number = 0; i < data.numDynamicStreams; i++ )
+					{
+						bitrates.addItem( { label: data.bitratesForDynamicStreams[i] } );
+					}
+					cmbQualities.selectedIndex = data.currentDynamicStreamIndex;
+				}
+				if ( data.currentDynamicStreamIndex != cmbQualities.selectedIndex ) cmbQualities.selectedIndex = data.currentDynamicStreamIndex;
+				lastData = data;
+				//txtDynamicStream.text = "isDynamic: " + data.isDynamicStream + " autoSwitch: " + data.autoDynamicStreamSwitch + " current: " + data.currentDynamicStreamIndex + " of " + data.numDynamicStreams;
+				//if ( data.isDynamicStream ) txtDynamicStream.text = data.bitratesForDynamicStreams[ data.currentDynamicStreamIndex ];
+			}
+			
+			public function toggleAutoDynamicSwitching():void
+			{
+				//do instead with autoDynamicSwitching
+				//( parentApplication as WindowContent ).video.toggleAutoDynamicSwitching();
+				if ( imgAutoSwitch.source == toggle_off )
+				{
+					isAuto = true;
+					imgAutoSwitch.source = toggle_on;
+					txtAutoSwitch.text = "Auto Quality";
+				} else
+				{
+					isAuto = false;
+					imgAutoSwitch.source = toggle_off;
+					txtAutoSwitch.text = "Manual Quality";
+				}
+				cmbQualities.enabled = !isAuto;
+			}
+			
+			public function toggleAlwaysOnTop():void
+			{
+				( parentApplication as WindowContent ).toggleAlwaysOnTop();
+				if ( ( parentApplication as WindowContent ).stage.nativeWindow.alwaysInFront )
+				{
+					imgPinned.source = toggle_on;
+				} else
+				{
+					imgPinned.source = toggle_off;
+				}
+			}
 		]]>
 	</fx:Script>
 	<!-- Background -->
 	<s:Rect width="100%" height="100%">
-		<s:fill><s:SolidColor color="0x1B1B1B" /></s:fill>
+		<s:fill><s:SolidColor color="0x1B1B1B" alpha="0.8" /></s:fill>
 	</s:Rect>
+	<s:VGroup gap="5" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+		<s:HGroup gap="5" height="32" verticalCenter="1" verticalAlign="middle">
+			<mx:Image id="imgPinned" buttonMode="true" mouseChildren="false" source="{toggle_off}" click="toggleAlwaysOnTop()" />
+			<mx:Text id="txtPinned" text="Always on Top" styleName="smallText" />
+		</s:HGroup>
+		<s:HGroup gap="5" height="32" verticalCenter="1" verticalAlign="middle">
+			<mx:Image id="imgAutoSwitch" buttonMode="true" mouseChildren="false" source="{toggle_on}" click="toggleAutoDynamicSwitching()" />
+			<mx:Text id="txtAutoSwitch" text="Auto quality" styleName="smallText" />
+			<s:DropDownList id="cmbQualities" dataProvider="{bitrates}" enabled="false" />
+		</s:HGroup>
+	</s:VGroup>
 </s:Group>
