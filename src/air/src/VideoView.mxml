@@ -12,6 +12,8 @@
 		<![CDATA[
 			import flash.events.Event;
 			import mx.events.ResizeEvent;
+			import org.osmf.events.DynamicStreamEvent;
+			import org.osmf.net.NetStreamLoadTrait;
 			import SimpleLoggerFactory;
 			import org.osmf.logging.Log;
 			import org.osmf.media.MediaPlayer;
@@ -30,11 +32,16 @@
 			import org.osmf.media.MediaPlayerState;
 			import org.osmf.net.StreamingURLResource;
 			import org.osmf.net.StreamType;
+			import org.osmf.traits.MediaTraitType;
+			import org.osmf.traits.DynamicStreamTrait;
+			import org.osmf.traits.LoadState;
 			import org.osmf.events.LoadEvent;
 			import org.osmf.media.URLResource;
 			import org.denivip.osmf.net.HLSDynamicStreamingResource;
 
 			import flash.events.TimerEvent;
+			
+			import objects.VideoDataObject;
 
 			private var mediaContainer:MediaContainer;
 			private var mediaPlayer:MediaPlayer;
@@ -112,10 +119,12 @@
 							
 							if ( mediaPlayer.isDynamicStream )
 							{
+
 								trace( "Dynamic Streams:" );
+								playerData.bitratesForDynamicStreams = new Array();
 								for ( var i:Number = 0; i < mediaPlayer.numDynamicStreams; i++ )
 								{
-									trace( " Stream " + i + ": " + mediaPlayer.getBitrateForDynamicStreamIndex(i) );
+									playerData.bitratesForDynamicStreams.push( mediaPlayer.getBitrateForDynamicStreamIndex(i) );
 								}
 							}
 						}
@@ -148,30 +157,43 @@
 			private function onLoadStateChange( event:LoadEvent ):void
 			{
 				trace( "Player load state change" );
+				switch ( event.loadState )
+				{
+					case LoadState.READY:
+						//load netstream
+						//var nsLoadTrait:NetStreamLoadTrait = mediaPlayer.media.getTrait(MediaTraitType.LOAD) as NetStreamLoadTrait;
+						//if ( nsLoadTrait != null ) netstream = nsLoadTrait.netStream;
+						//add stream listeners
+						break;
+				}
 				
 			}
 			
 			public function load( url:String ):void
 			{
 				var mediaElement:MediaElement;
-				if ( url.indexOf(".f4m") > 0 || url.indexOf(".smil") > 0 || url.indexOf(".flv") > 0 )
+				if ( url.indexOf("youtube.com") > 0 )
+				{
+					var media:StreamingURLResource = new StreamingURLResource( url, StreamType.LIVE_OR_RECORDED );
+					mediaElement = ( Helper.pluginFactory.yt as DefaultMediaFactory ).createMediaElement( media );
+				} else if ( url.indexOf(".f4m") > 0 || url.indexOf(".smil") > 0 || url.indexOf(".flv") > 0 )
 				{
 					//load hds
 					trace( "loading Adobe HDS url" );
 					var hds:StreamingURLResource = new StreamingURLResource( url, StreamType.LIVE_OR_RECORDED );
-					mediaElement = ( Main.pluginFactory.hds as DefaultMediaFactory ).createMediaElement( hds );
+					mediaElement = ( Helper.pluginFactory.hds as DefaultMediaFactory ).createMediaElement( hds );
 				} else if ( url.indexOf(".ism") > 0 )
 				{
 					trace( "loading Microsoft Smooth Streaming url" );
 					var mss:URLResource = new URLResource( url );
 					//var mss:AdaptiveStreamingDynamicResource = new AdaptiveStreamingDynamicResource( new AdaptiveStreamingManifestInfo( url ) );
-					mediaElement = ( Main.pluginFactory.mss as DefaultMediaFactory ).createMediaElement( mss );
+					mediaElement = ( Helper.pluginFactory.mss as DefaultMediaFactory ).createMediaElement( mss );
 				} else if ( url.indexOf(".m3u8") > 0 )
 				{
 					trace( "loading Apple HLS url" );
 					//var hls:URLResource = new URLResource( url );
 					var hls:HLSDynamicStreamingResource = new HLSDynamicStreamingResource( url );
-					mediaElement = ( Main.pluginFactory.hls as DefaultMediaFactory ).createMediaElement( hls );
+					mediaElement = ( Helper.pluginFactory.hls as DefaultMediaFactory ).createMediaElement( hls );
 				}
 				
 				if ( mediaElement != null )
@@ -230,6 +252,16 @@
 				if ( mediaPlayer.playing ) mediaPlayer.stop();
 			}
 			
+			public function toggleAutoDynamicSwitching():void
+			{
+				if ( mediaPlayer != null && mediaPlayer.media != null && mediaPlayer.isDynamicStream )
+				{
+					
+					//( mediaPlayer.media.getTrait( MediaTraitType.DYNAMIC_STREAM ) as DynamicStreamTrait ).autoSwitch = !mediaPlayer.autoDynamicStreamSwitch;
+					//new DynamicStreamEvent(DynamicStreamEvent.AUTO_SWITCH_CHANGE, false, false,
+				}
+			}
+
 			//we send video data to interested listeners every second
 			private function notifyDataListeners( event:TimerEvent ):void
 			{
@@ -241,10 +273,13 @@
 				playerData.displayTime = Helper.convertToHHMMSS( mediaPlayer.currentTime ) + " / " + Helper.convertToHHMMSS( mediaPlayer.duration );
 				playerData.duration = mediaPlayer.duration;
 				playerData.bufferTime = mediaPlayer.bufferTime;
+				playerData.isDynamicStream = mediaPlayer.isDynamicStream;
 				playerData.autoDynamicStreamSwitch = mediaPlayer.autoDynamicStreamSwitch;
 				playerData.currentDynamicStreamIndex = mediaPlayer.currentDynamicStreamIndex;
+				playerData.numDynamicStreams = mediaPlayer.numDynamicStreams;
 				
 				( parentApplication as WindowContent ).playerControls.onData( playerData );
+				( parentApplication as WindowContent ).playerSettings.onData( playerData );
 			}
 			
 		]]>
