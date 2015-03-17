@@ -11,8 +11,8 @@
 
 			private function onStreamClick(event:Event):void
 			{
-				( parentApplication as WindowContent ).video.load( data.url );
-				( parentApplication as WindowContent ).streamSelect.close();
+				if ( data.url != null ) ( parentApplication as WindowContent ).video.load( data.url );
+				( parentApplication as WindowContent ).channels.close();
 			}
 		
 		]]>

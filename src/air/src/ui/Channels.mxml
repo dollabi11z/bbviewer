@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+               xmlns:s="library://ns.adobe.com/flex/spark" 
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+			   creationComplete="init()"
+			   width="90%" height="90%">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+		<mx:ArrayCollection id="channels">
+			<fx:Object label="Test Video Streams" />
+			<fx:Object label="Big Brother US" />
+			<fx:Object label="Big Brother Canada" />
+		</mx:ArrayCollection>
+
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.display3D.IndexBuffer3D;
+			import mx.collections.ArrayCollection;
+			import spark.events.IndexChangeEvent;
+			import channel.TestVideos;
+			import channel.BBCA;
+			import channel.BBUS;
+			import channel.BBUK;
+			import objects.StreamObject;
+			
+			[ Bindable ] private var channelInterfaces:ArrayCollection = new ArrayCollection();
+			[ Bindable ] private var subs:ArrayCollection = new ArrayCollection();
+			[ Bindable ] private var availableStreams:ArrayCollection = new ArrayCollection();
+			
+			public function init():void
+			{
+				channelInterfaces.addItem( new TestVideos() );
+				loadStreams("Test Video Streams");
+			}
+			
+			public function loadStreams( channel:String, sub:String = "" ):void
+			{
+				availableStreams.removeAll();
+				for ( var i:Number = 0; i < channelInterfaces.length; i++ )
+				{
+					if ( channelInterfaces[i].getChannelName() == channel )
+					{
+						var content:Object = channelInterfaces[i].getContent();
+						
+						//get subs
+						var subid:String = "";
+						subs.removeAll();
+						for each( var subchannel:Object in content.subs )
+						{
+							subs.addItem( { id: subchannel.id, label: subchannel.label } );
+							if ( subchannel.label == sub ) subid = subchannel.id; 
+						}
+						
+						for each( var stream:Object in content.streams )
+						{
+							var item:StreamObject = new StreamObject();
+								item.sub = stream.sub;
+								item.label = stream.label;
+								item.desc = stream.desc;
+								item.url = stream.url;
+								item.resolver = stream.resolver;
+							if ( sub == "" ||  item.sub == subid ) availableStreams.addItem( item );
+						}
+					}
+				}
+			}
+			
+			public function onChangeChannel( event:IndexChangeEvent ):void
+			{
+				var selectedRow:Object = event.currentTarget.selectedItem;
+				loadStreams(selectedRow.label);
+			}
+			
+			public function onChangeSub( event:IndexChangeEvent ):void
+			{
+				var selectedRow:Object = event.currentTarget.selectedItem;
+				loadStreams( channels.getItemAt(cmbChannels.selectedIndex).label, selectedRow.label );
+				trace("loading: " + channels.getItemAt(cmbChannels.selectedIndex).label + " : " + selectedRow.label );
+			}
+			
+			public function close():void
+			{
+				this.visible = false;
+			}
+ 
+		]]>
+	</fx:Script>
+	<s:TitleWindow title="Videos" width="100%" height="100%" close="close()">
+		<s:VGroup width="100%" height="100%" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
+			<s:HGroup verticalCenter="1" verticalAlign="middle">
+				<mx:Text text="Channel" />
+				<s:DropDownList id="cmbChannels" width="125" dataProvider="{channels}" selectedIndex="0" change="onChangeChannel(event)" /> 
+				<s:Button label="Add" />
+				<s:Button label="Remove" enabled="false" />
+			</s:HGroup>
+			<s:HGroup verticalCenter="1" verticalAlign="middle">
+				<mx:Text text="Sub" />
+				<s:DropDownList id="cmbSubs" width="125" dataProvider="{subs}" selectedIndex="0" change="onChangeSub(event)" /> 
+			</s:HGroup>
+			<s:List 
+				id="vidcontainer"
+				itemRenderer="ui.StreamItemRenderer"
+				dataProvider="{availableStreams}"
+				verticalScrollPolicy="on"
+				width="100%"
+				height="100%"> 
+				<s:layout>
+					<s:VerticalLayout useVirtualLayout="true" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" />
+				</s:layout>
+			</s:List>
+		</s:VGroup>
+	</s:TitleWindow>
+</s:Group>
