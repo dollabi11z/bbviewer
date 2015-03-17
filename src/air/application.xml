@@ -2,7 +2,8 @@
 <application xmlns="http://ns.adobe.com/air/application/2.6"> 
 	
 	<id>BBViewer</id> 
-	<versionNumber>1.0</versionNumber> 
+	<versionNumber>1.0</versionNumber>
+	<supportedProfiles>desktop</supportedProfiles>
 	<filename>BBViewer</filename> 
 	
 	<name>BBViewer</name> 
@@ -18,10 +19,22 @@
 		<minimizable>true</minimizable> 
 		<maximizable>true</maximizable> 
 		<resizable>true</resizable> 
+		<!--<fullScreen>true</fullScreen>-->
+		<!--<autoOrients>false</autoOrients>-->
+		<!--<aspectRatio>landscape</aspectRatio>-->
 	</initialWindow> 
 	
 	<!-- 
-	More options:
+	AIR options:
 	http://livedocs.adobe.com/flex/3/html/File_formats_1.html#1043413
+	
+	AIR mobile options:
+	http://help.adobe.com/en_US/air/build/WSfffb011ac560372f-5d0f4f25128cc9cd0cb-7ffe.html
+	
+	iOS icons guidelines:
+	http://developer.apple.com/library/ios/#documentation/userexperience/conceptual/mobilehig/IconsImages/IconsImages.html
+	
+	Android manifest documentation:
+	http://developer.android.com/guide/topics/manifest/manifest-intro.html
 	-->
 </application>

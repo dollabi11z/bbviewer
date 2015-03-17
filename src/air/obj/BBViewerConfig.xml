@@ -16,7 +16,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'3/16/2015'</value>
+      <value>'3/17/2015'</value>
     </define>
     <define append="true">
       <name>CONFIG::air</name>
@@ -41,6 +41,8 @@
     <verbose-stacktraces>true</verbose-stacktraces>
     <source-path append="true">
       <path-element>C:\Users\Tim\Dropbox\Projects\bbviewer\src\air\src</path-element>
+      <path-element>C:\Users\Tim\Dropbox\Projects\bbviewer\src\air\lib\org</path-element>
+      <path-element>C:\Users\Tim\Dropbox\Projects\bbviewer\src\air\lib</path-element>
       <path-element>C:\Program Files (x86)\FlashDevelop\Library\AS3\classes</path-element>
     </source-path>
     <library-path append="true">
