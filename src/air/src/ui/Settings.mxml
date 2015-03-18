@@ -20,16 +20,81 @@
 			[Embed(source = "../assets/images/toggle_off.png")]
 			[ Bindable ]
 			public var toggle_off:Class;
+			
 			[Embed(source = "../assets/images/toggle_on.png")]
 			[ Bindable ]
 			public var toggle_on:Class;
+			
+			[Embed(source = "../assets/images/audio_left_off.png")]
 			[ Bindable ]
+			public var audio_left_off:Class;
+			
+			[Embed(source = "../assets/images/audio_left_on.png")]
+			[ Bindable ]
+			public var audio_left_on:Class;
+			
+			[Embed(source = "../assets/images/audio_left_disabled.png")]
+			[ Bindable ]
+			public var audio_left_disabled:Class;
+			
+			[Embed(source = "../assets/images/audio_mid_off.png")]
+			[ Bindable ]
+			public var audio_mid_off:Class;
+			
+			[Embed(source = "../assets/images/audio_mid_on.png")]
+			[ Bindable ]
+			public var audio_mid_on:Class;
+			
+			[Embed(source = "../assets/images/audio_mid_disabled.png")]
+			[ Bindable ]
+			public var audio_mid_disabled:Class;
+			
+			[Embed(source = "../assets/images/audio_right_off.png")]
+			[ Bindable ]
+			public var audio_right_off:Class;
+			
+			[Embed(source = "../assets/images/audio_right_on.png")]
+			[ Bindable ]
+			public var audio_right_on:Class;
+			
+			[Embed(source = "../assets/images/audio_right_disabled.png")]
+			[ Bindable ]
+			public var audio_right_disabled:Class;
+						
+			[Bindable]
 			private var bitrates:ArrayCollection = new ArrayCollection();
 			private var lastData:VideoDataObject = new VideoDataObject();
 			private var isAuto:Boolean = true;
+			private var panSet:Boolean = false;
 			
+			//Data is passed from the main app to let us know about the state of the video
 			public function onData( data:VideoDataObject ):void
 			{
+				if ( panSet )
+				{
+					//disable audio pan ( should be when no video is playing )
+					if ( !data.playing )
+					{
+						imgAudioLeft.enabled = false;
+						imgAudioLeft.source = audio_left_disabled;
+						imgAudioMid.enabled = false;
+						imgAudioMid.source = audio_mid_disabled;
+						imgAudioRight.enabled = false;
+						imgAudioRight.source = audio_right_disabled;
+						panSet = false;
+					}
+				} else 
+				{
+					if ( data.playing )
+					{
+						//enable audio pan
+						imgAudioLeft.enabled = true;
+						imgAudioMid.enabled = true;
+						imgAudioRight.enabled = true;
+						setPan(0);
+						panSet = true;
+					}
+				}
 				if ( data.playing && ( bitrates.length == 0 || data.numDynamicStreams != lastData.numDynamicStreams ) )
 				{
 					//update bitrates
@@ -46,6 +111,8 @@
 				//if ( data.isDynamicStream ) txtDynamicStream.text = data.bitratesForDynamicStreams[ data.currentDynamicStreamIndex ];
 			}
 			
+			//Request a toggle of auto dynamic bitrate switching
+			//adjust controls as necessary
 			public function toggleAutoDynamicSwitching():void
 			{
 				//do instead with autoDynamicSwitching
@@ -64,6 +131,36 @@
 				cmbQualities.enabled = !isAuto;
 			}
 			
+			//Request an audio pan for the video
+			//adjusts controls based on result
+			public function setPan( pan:Number ):void
+			{
+				var panSuccessful:Boolean = ( parentApplication as WindowContent ).video.panVolume( pan );
+				if ( panSuccessful )
+				{
+					switch( pan )
+					{
+						case -1:
+							imgAudioLeft.source = audio_left_on;
+							imgAudioMid.source = audio_mid_off;
+							imgAudioRight.source = audio_right_off;
+							break;
+						case 0:
+							imgAudioLeft.source = audio_left_off;
+							imgAudioMid.source = audio_mid_on;
+							imgAudioRight.source = audio_right_off;
+							break;
+						case 1:
+							imgAudioLeft.source = audio_left_off;
+							imgAudioMid.source = audio_mid_off;
+							imgAudioRight.source = audio_right_on;
+							break;
+					}
+				}
+			}
+			
+			//Request a toggle of always on top
+			//adjust controls as necessary
 			public function toggleAlwaysOnTop():void
 			{
 				( parentApplication as WindowContent ).toggleAlwaysOnTop();
@@ -77,19 +174,34 @@
 			}
 		]]>
 	</fx:Script>
+	
 	<!-- Background -->
 	<s:Rect width="100%" height="100%">
 		<s:fill><s:SolidColor color="0x1B1B1B" alpha="0.8" /></s:fill>
 	</s:Rect>
-	<s:VGroup gap="5" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
-		<s:HGroup gap="5" height="32" verticalCenter="1" verticalAlign="middle">
-			<mx:Image id="imgPinned" buttonMode="true" mouseChildren="false" source="{toggle_off}" click="toggleAlwaysOnTop()" />
-			<mx:Text id="txtPinned" text="Always on Top" styleName="smallText" />
-		</s:HGroup>
-		<s:HGroup gap="5" height="32" verticalCenter="1" verticalAlign="middle">
-			<mx:Image id="imgAutoSwitch" buttonMode="true" mouseChildren="false" source="{toggle_on}" click="toggleAutoDynamicSwitching()" />
-			<mx:Text id="txtAutoSwitch" text="Auto quality" styleName="smallText" />
-			<s:DropDownList id="cmbQualities" dataProvider="{bitrates}" enabled="false" />
+	
+	<s:VGroup gap="2" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+		<s:HGroup gap="5" verticalCenter="1" verticalAlign="middle">
+			<!-- Setting Descriptions -->
+			<s:VGroup>
+				<mx:Text id="txtPinned" height="32" text="Always on Top" styleName="smallText" />
+				<mx:Text id="txtAutoSwitch" height="32" text="Auto quality" styleName="smallText" />
+				<mx:Text id="txtAudioPan" height="32" text="Audio Pan" styleName="smallText" />
+			</s:VGroup>
+			<!-- Setting Controls -->
+			<s:VGroup>
+				<mx:Image id="imgPinned" buttonMode="true" mouseChildren="false" source="{toggle_off}" click="toggleAlwaysOnTop()" />
+				<s:HGroup gap="5" verticalCenter="1" verticalAlign="middle">
+					<mx:Image id="imgAutoSwitch" buttonMode="true" mouseChildren="false" source="{toggle_on}" click="toggleAutoDynamicSwitching()" />
+					<s:DropDownList id="cmbQualities" dataProvider="{bitrates}" enabled="false" />
+				</s:HGroup>
+				<s:HGroup height="32" gap="0" verticalCenter="1" verticalAlign="middle">
+					<mx:Image id="imgAudioLeft" width="24" buttonMode="true" mouseChildren="false" enabled="false" source="{audio_left_disabled}" click="setPan(-1)" />
+					<mx:Image id="imgAudioMid" width="24" buttonMode="true" mouseChildren="false" enabled="false" source="{audio_mid_disabled}" click="setPan(0)" />
+					<mx:Image id="imgAudioRight" width="24" buttonMode="true" mouseChildren="false" enabled="false" source="{audio_right_disabled}" click="setPan(1)" />
+				</s:HGroup>
+			</s:VGroup>
 		</s:HGroup>
 	</s:VGroup>
+
 </s:Group>

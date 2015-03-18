@@ -32,6 +32,8 @@
 	<fx:Script>
 		<![CDATA[
 			import flash.display.NativeWindow;
+			import flash.events.KeyboardEvent;
+			import flash.ui.Keyboard;
 			import flash.net.URLRequest;
 			import flash.sampler.DeleteObjectSample;
 			import flash.utils.Timer;
@@ -42,10 +44,12 @@
 			
 			private static const defaultWindowTitle:String = "BBViewer";
 			private var nativeWindow:ExtendedNativeWindow;
+			private var disableHotkeys:Boolean = false;
 
 			private function init():void
 			{
 				stage.color = 0x000000;
+				stage.addEventListener( KeyboardEvent.KEY_UP, onKeyUp );
 			}
 			
 			private function onMenuItemClick(event:MenuEvent):void
@@ -64,6 +68,14 @@
 				if ( event.item.@id == "help" ) showHelp();
             }
 			
+			private function onKeyUp( event:KeyboardEvent ):void
+			{
+				if ( !disableHotkeys )
+				{
+					if ( event.keyCode == Keyboard.ESCAPE ) toggleControls();
+				}
+			}
+			
 			private function setFixedSize(w:Number, h:Number):void
 			{
 				//set the window to a fixed size
@@ -78,6 +90,11 @@
 				stage.nativeWindow.alwaysInFront = !stage.nativeWindow.alwaysInFront;
 			}
 			
+			public function toggleControls():void
+			{
+				playerControls.visible = !playerControls.visible;
+				appMenu.visible = !appMenu.visible
+			}
 			public function toggleSettings():void
 			{
 				playerSettings.visible = !playerSettings.visible;

@@ -4,7 +4,7 @@
                xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:local="*"
 			   xmlns:ui="ui.*"
-			   height="56">
+			   width="100%">
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->		
@@ -18,7 +18,7 @@
 			import flash.filters.DropShadowFilter;
 			import flash.events.Event;
 			import objects.VideoDataObject;
-			
+
 			private static const SKIP_SHORT:Number = 15;
 			private static const SKIP_LONG:Number = 60;
 			
@@ -46,7 +46,10 @@
 					pause.visible = false;
 					play.visible = true;
 				}
+				//set play time
 				txtState.text = data.displayTime;
+				//check for mute
+				
 			}
 			
 			public function startProgressDrag( event:MouseEvent ):void
@@ -101,18 +104,47 @@
 					}
 				}
 			}
+			
+			private function mute():void
+			{
+				if ( ( parentApplication as WindowContent ).video.mute() )
+				{
+					volume.visible = false;
+					volume_mute.visible = true;
+				}
+			}
+			
+			private function unmute():void
+			{
+				if ( ( parentApplication as WindowContent ).video.unmute() )
+				{
+					volume_mute.visible = false;
+					volume.visible = true;
+				}
+			}
 		]]>
 	</fx:Script>
-	
+	<!-- Background -->
+	<!-- Seekbar controls -->
+	<!-- Center controls ( may be hidden ) -->
+	<!-- Left side controls -->
+	<!-- Right side controls -->
+
+	<!--
 	<ui:AlternateAngles id="playerAngles" width="100%" top="-50" visible="false" />
 
-	<!-- Background -->
-	<s:Rect width="100%" height="56">
-		<s:fill><s:SolidColor color="0x1B1B1B" /></s:fill>
-	</s:Rect>
 	
-	<!-- Slider controls -->
-	<s:Group id="slider" width="100%" height="24" top="-5"
+	
+	
+	-->
+	
+	<s:Group top="16" width="100%" height="100%">
+		<s:Rect width="100%" height="100%">
+			<s:fill><s:SolidColor color="0x1B1B1B" alpha="0.8" /></s:fill>
+		</s:Rect>
+	</s:Group>
+	
+	<s:Group id="slider" width="100%" height="24" bottom="47"
 			mouseDown="startProgressDrag(event)"
 			mouseMove="doProgressDrag(event)"
 			mouseUp="endProgressDrag(event)"
@@ -136,79 +168,103 @@
 			/>
 	</s:Group>
 	
-	<!-- Play controls -->
-	<s:Group height="32" top="24">
-		<s:HGroup verticalCenter="1">
-			<s:Group>
-				<ui:ImageButton id="pause" click="parentApplication.video.pause()"
-					visible="false"
-					width="32" height="32"
-					skinClass="ui.ImageButtonSkin"
-					image="@Embed(source='../assets/images/pause_normal.png')"
-					imageDown="@Embed(source='../assets/images/pause_down.png')"
-					imageOver="@Embed(source='../assets/images/pause_over.png')"
-					imageDisabled="@Embed(source='../assets/images/pause_disabled.png')"
-					enabled="false"
-					/>
-				<ui:ImageButton id="play" click="parentApplication.video.play()"
-					width="32" height="32"
-					skinClass="ui.ImageButtonSkin"
-					image="@Embed(source='../assets/images/play_normal.png')"
-					imageDown="@Embed(source='../assets/images/play_down.png')"
-					imageOver="@Embed(source='../assets/images/play_over.png')"
-					imageDisabled="@Embed(source='../assets/images/play_disabled.png')"
-					enabled="false"
-					/>
-			</s:Group>
-			<ui:ImageButton id="back" click="parentApplication.video.backwards(SKIP_LONG)"
+	<s:HGroup width="100%" top="20" verticalAlign="middle" horizontalAlign="center">
+		<mx:Text id="txtState"
+						focusEnabled="false"
+						text="This is the text"
+						styleName="smallText"
+						filters="{[new DropShadowFilter(2, 33)]}"
+						/>
+	</s:HGroup>
+
+	<s:HGroup minWidth="64" bottom="0" left="0" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5">
+		<s:Group width="32" height="32">
+			<ui:ImageButton id="pause" click="parentApplication.video.pause()"
+				visible="false"
 				width="32" height="32"
 				skinClass="ui.ImageButtonSkin"
-				image="@Embed(source='../assets/images/back_normal.png')"
-				imageDown="@Embed(source='../assets/images/back_down.png')"
-				imageOver="@Embed(source='../assets/images/back_over.png')"
-				imageDisabled="@Embed(source='../assets/images/back_disabled.png')" />
-			<ui:ImageButton id="forward" click="parentApplication.video.forward(SKIP_LONG)"
-				width="32" height="32"
-				skinClass="ui.ImageButtonSkin"
-				image="@Embed(source='../assets/images/forward_normal.png')"
-				imageDown="@Embed(source='../assets/images/forward_down.png')"
-				imageOver="@Embed(source='../assets/images/forward_over.png')"
-				imageDisabled="@Embed(source='../assets/images/forward_disabled.png')" />	
-			<ui:ImageButton id="jumpback" click="parentApplication.video.backwards(SKIP_SHORT)"
-				width="32" height="32"
-				skinClass="ui.ImageButtonSkin"
-				image="@Embed(source='../assets/images/jumpback_normal.png')"
-				imageDown="@Embed(source='../assets/images/jumpback_down.png')"
-				imageOver="@Embed(source='../assets/images/jumpback_over.png')"
-				imageDisabled="@Embed(source='../assets/images/jumpback_disabled.png')" />
-			<ui:ImageButton id="jumpforward" click="parentApplication.video.forward(SKIP_SHORT)"
-				width="32" height="32"
-				skinClass="ui.ImageButtonSkin"
-				image="@Embed(source='../assets/images/jumpforward_normal.png')"
-				imageDown="@Embed(source='../assets/images/jumpforward_down.png')"
-				imageOver="@Embed(source='../assets/images/jumpforward_over.png')"
-				imageDisabled="@Embed(source='../assets/images/jumpforward_disabled.png')" />
-			<mx:Text id="txtState"
-				focusEnabled="false"
-				text=""
-				width="96"
-				styleName="smallText"
-				filters="{[new DropShadowFilter(2, 33)]}"
+				image="@Embed(source='../assets/images/pause_normal.png')"
+				imageDown="@Embed(source='../assets/images/pause_down.png')"
+				imageOver="@Embed(source='../assets/images/pause_over.png')"
+				imageDisabled="@Embed(source='../assets/images/pause_disabled.png')"
+				enabled="false"
 				/>
-			<ui:ImageButton id="settings" click="parentApplication.toggleSettings()" right="0"
+			<ui:ImageButton id="play" click="parentApplication.video.play()"
 				width="32" height="32"
 				skinClass="ui.ImageButtonSkin"
-				image="@Embed(source='../assets/images/settings_normal.png')"
-				imageDown="@Embed(source='../assets/images/settings_down.png')"
-				imageOver="@Embed(source='../assets/images/settings_over.png')"
-				imageDisabled="@Embed(source='../assets/images/settings_disabled.png')" />
-			<ui:ImageButton id="fullscreen" click="parentApplication.toggleFullscreen()" right="0"
+				image="@Embed(source='../assets/images/play_normal.png')"
+				imageDown="@Embed(source='../assets/images/play_down.png')"
+				imageOver="@Embed(source='../assets/images/play_over.png')"
+				imageDisabled="@Embed(source='../assets/images/play_disabled.png')"
+				enabled="false"
+				/>
+		</s:Group>
+		<s:Group width="32" height="32">
+			<ui:ImageButton id="volume" click="mute()"
 				width="32" height="32"
 				skinClass="ui.ImageButtonSkin"
-				image="@Embed(source='../assets/images/fullscreen_normal.png')"
-				imageDown="@Embed(source='../assets/images/fullscreen_down.png')"
-				imageOver="@Embed(source='../assets/images/fullscreen_over.png')"
-				imageDisabled="@Embed(source='../assets/images/fullscreen_disabled.png')" />
-		</s:HGroup>
-	</s:Group>
+				image="@Embed(source='../assets/images/volume_normal.png')"
+				imageDown="@Embed(source='../assets/images/volume_down.png')"
+				imageOver="@Embed(source='../assets/images/volume_over.png')"
+				imageDisabled="@Embed(source='../assets/images/volume_disabled.png')"
+				/>
+			<ui:ImageButton id="volume_mute" click="unmute()"
+				width="32" height="32"
+				skinClass="ui.ImageButtonSkin"
+				image="@Embed(source='../assets/images/mute_normal.png')"
+				imageDown="@Embed(source='../assets/images/mute_down.png')"
+				imageOver="@Embed(source='../assets/images/mute_over.png')"
+				imageDisabled="@Embed(source='../assets/images/mute_disabled.png')"
+				visible="false"
+				/>
+		</s:Group>
+	</s:HGroup>
+	
+	<s:HGroup bottom="0" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5" horizontalCenter="1">
+		<ui:ImageButton id="back" click="parentApplication.video.backwards(SKIP_LONG)"
+			width="32" height="32"
+			skinClass="ui.ImageButtonSkin"
+			image="@Embed(source='../assets/images/back_normal.png')"
+			imageDown="@Embed(source='../assets/images/back_down.png')"
+			imageOver="@Embed(source='../assets/images/back_over.png')"
+			imageDisabled="@Embed(source='../assets/images/back_disabled.png')" />
+		<ui:ImageButton id="jumpback" click="parentApplication.video.backwards(SKIP_SHORT)"
+			width="32" height="32"
+			skinClass="ui.ImageButtonSkin"
+			image="@Embed(source='../assets/images/jumpback_normal.png')"
+			imageDown="@Embed(source='../assets/images/jumpback_down.png')"
+			imageOver="@Embed(source='../assets/images/jumpback_over.png')"
+			imageDisabled="@Embed(source='../assets/images/jumpback_disabled.png')" />
+		<ui:ImageButton id="jumpforward" click="parentApplication.video.forward(SKIP_SHORT)"
+			width="32" height="32"
+			skinClass="ui.ImageButtonSkin"
+			image="@Embed(source='../assets/images/jumpforward_normal.png')"
+			imageDown="@Embed(source='../assets/images/jumpforward_down.png')"
+			imageOver="@Embed(source='../assets/images/jumpforward_over.png')"
+			imageDisabled="@Embed(source='../assets/images/jumpforward_disabled.png')" />
+		<ui:ImageButton id="forward" click="parentApplication.video.forward(SKIP_LONG)"
+			width="32" height="32"
+			skinClass="ui.ImageButtonSkin"
+			image="@Embed(source='../assets/images/forward_normal.png')"
+			imageDown="@Embed(source='../assets/images/forward_down.png')"
+			imageOver="@Embed(source='../assets/images/forward_over.png')"
+			imageDisabled="@Embed(source='../assets/images/forward_disabled.png')" />	
+	</s:HGroup>
+	
+	<s:HGroup bottom="0" minWidth="64" right="0" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5">
+		<ui:ImageButton id="settings" click="parentApplication.toggleSettings()" right="0"
+			width="32" height="32"
+			skinClass="ui.ImageButtonSkin"
+			image="@Embed(source='../assets/images/settings_normal.png')"
+			imageDown="@Embed(source='../assets/images/settings_down.png')"
+			imageOver="@Embed(source='../assets/images/settings_over.png')"
+			imageDisabled="@Embed(source='../assets/images/settings_disabled.png')" />
+		<ui:ImageButton id="fullscreen" click="parentApplication.toggleFullscreen()" right="0"
+			width="32" height="32"
+			skinClass="ui.ImageButtonSkin"
+			image="@Embed(source='../assets/images/fullscreen_normal.png')"
+			imageDown="@Embed(source='../assets/images/fullscreen_down.png')"
+			imageOver="@Embed(source='../assets/images/fullscreen_over.png')"
+			imageDisabled="@Embed(source='../assets/images/fullscreen_disabled.png')" />
+	</s:HGroup>
 </s:Group>

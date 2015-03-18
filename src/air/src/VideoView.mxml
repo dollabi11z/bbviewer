@@ -11,6 +11,9 @@
 	<fx:Script>
 		<![CDATA[
 			import flash.events.Event;
+			import flash.media.Sound;
+			import flash.media.SoundTransform;
+			import flash.net.NetStream;
 			import mx.events.ResizeEvent;
 			import org.osmf.events.DynamicStreamEvent;
 			import org.osmf.net.NetStreamLoadTrait;
@@ -47,6 +50,7 @@
 			private var mediaPlayer:MediaPlayer;
 			private var dataTimer:Timer;
 			private var playerData:VideoDataObject = new VideoDataObject();
+			private var netstream:NetStream;
 
 			private function init():void
 			{
@@ -161,8 +165,8 @@
 				{
 					case LoadState.READY:
 						//load netstream
-						//var nsLoadTrait:NetStreamLoadTrait = mediaPlayer.media.getTrait(MediaTraitType.LOAD) as NetStreamLoadTrait;
-						//if ( nsLoadTrait != null ) netstream = nsLoadTrait.netStream;
+						var nsLoadTrait:NetStreamLoadTrait = mediaPlayer.media.getTrait(MediaTraitType.LOAD) as NetStreamLoadTrait;
+						if ( nsLoadTrait != null ) netstream = nsLoadTrait.netStream;
 						//add stream listeners
 						break;
 				}
@@ -221,6 +225,39 @@
 					mediaContainer.height = videoContainer.height;
 				}
 			}
+			
+			public function panVolume( val:Number ):Boolean
+			{
+				if ( netstream != null )
+				{
+					var st:SoundTransform = new SoundTransform( mediaPlayer.volume );
+					st.pan = val;
+					netstream.soundTransform = st;
+					return true;
+				}
+				return false;
+			}
+			
+			public function unmute():Boolean
+			{
+				if ( mediaPlayer != null && mediaPlayer.media != null && mediaPlayer.muted )
+				{
+					mediaPlayer.muted = false;
+					return true;
+				}
+				return false;
+			}
+			
+			public function mute():Boolean
+			{
+				if ( mediaPlayer != null && mediaPlayer.media != null && !mediaPlayer.muted )
+				{
+					mediaPlayer.muted = true;
+					return true;
+				}
+				return false;
+			}
+			
 			public function seek( toSecs:Number ):void
 			{
 				if ( mediaPlayer != null && mediaPlayer.media != null ) mediaPlayer.seek( toSecs );

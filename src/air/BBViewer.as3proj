@@ -139,6 +139,15 @@
     <asset path="src\assets\icons\BBViewer16.png" />
     <asset path="src\assets\icons\BBViewer32.png" />
     <asset path="src\assets\icons\BBViewer48.png" />
+    <asset path="src\assets\images\audio_right_on.png" />
+    <asset path="src\assets\images\audio_left_on.png" />
+    <asset path="src\assets\images\audio_mid_off.png" />
+    <asset path="src\assets\images\audio_mid_on.png" />
+    <asset path="src\assets\images\audio_right_off.png" />
+    <asset path="src\assets\images\audio_left_off.png" />
+    <asset path="src\assets\images\audio_mid_disabled.png" />
+    <asset path="src\assets\images\audio_left_disabled.png" />
+    <asset path="src\assets\images\audio_right_disabled.png" />
   </library>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>
