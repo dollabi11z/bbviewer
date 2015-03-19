@@ -16,7 +16,7 @@
     </define>
     <define append="true">
       <name>CONFIG::timeStamp</name>
-      <value>'3/18/2015'</value>
+      <value>'3/19/2015'</value>
     </define>
     <define append="true">
       <name>CONFIG::air</name>
@@ -50,6 +50,7 @@
       <path-element>C:\Users\Tim\Dropbox\Projects\bbviewer\src\air\lib\HLSPlugin.swc</path-element>
       <path-element>C:\Users\Tim\Dropbox\Projects\bbviewer\src\air\lib\MSAdaptiveStreamingPlugin-v1.0.10-osmf2.0.swc</path-element>
       <path-element>C:\Users\Tim\Dropbox\Projects\bbviewer\src\air\lib\AkamaiAdvancedStreamingPlugin-3.4.swc</path-element>
+      <path-element>C:\Users\Tim\Dropbox\Projects\bbviewer\src\air\lib\as3irclib-0.0.1.swc</path-element>
     </library-path>
   </compiler>
   <file-specs>

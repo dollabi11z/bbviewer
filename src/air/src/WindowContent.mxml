@@ -23,6 +23,7 @@
 				<item id="sizeFullscreen" label="Fullscreen" />
 			</menu>
 			<menu label="Tools">
+				<item id="showchat" label="IRC Chat" />
 				<item id="help" label="Help" />
 			</menu>
 		</fx:XMLList>
@@ -64,6 +65,8 @@
 				if ( event.item.@id == "sizeLarge" ) setFixedSize(640, 360);
 				if ( event.item.@id == "sizeFullscreen" ) toggleFullscreen();
 				if ( event.item.@id == "ontop" ) toggleAlwaysOnTop();
+				if ( event.item.@id == "showchat" ) toggleChat();
+				
 				//Tools menu
 				if ( event.item.@id == "help" ) showHelp();
             }
@@ -111,6 +114,11 @@
 				}
 			}
 			
+			public function toggleChat():void
+			{
+				chat.visible = !chat.visible;
+			}
+			
 			private function showChannels():void
 			{
 				channels.visible = true;
@@ -136,6 +144,8 @@
 		]]>
 	</fx:Script>
 	<local:VideoView id="video" width="100%" height="100%" />
+	<!-- Still a ways to go, just the basic stuff is there -->
+	<ui:Chat id="chat" width="33%" height="100%" visible="false" />
 	<ui:Controls id="playerControls" width="100%" bottom="0" />
 	<ui:Settings id="playerSettings" bottom="61" right="10" visible="false" />
 	<ui:Help id="help" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />

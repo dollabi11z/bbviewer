@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+               xmlns:s="library://ns.adobe.com/flex/spark" 
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+			   creationComplete="init()"
+			   removedFromStage="wrapup()"
+			   width="33%" height="100%" right="0" top="20">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.fleo.irc.IRC;
+			import com.fleo.irc.events.*;
+			import flash.events.Event;
+			import flash.events.KeyboardEvent;
+			import flash.ui.Keyboard;
+			import flash.net.SharedObject;
+
+			private static const IRC_FONT_SIZE:String = "16";
+			private static const IRC_COLOR_OTHER_CHANNEL:String = "#333399";
+			private static const IRC_COLOR_PRIVMSG:String = "#000099";
+			private static const IRC_COLOR_OWNMSG:String = "#990099";
+			private static const IRC_COLOR_TOPIC:String = "#009900";
+			private static const IRC_COLOR_STATUS:String = "#666666";
+			private static const IRC_COLOR_JOIN:String = "#FFA200";
+			private static const IRC_COLOR_PART:String = "#666666";
+			private static const IRC_COLOR_QUIT:String = "#807B9C";
+			private static const IRC_COLOR_MODE:String = "#40B830";
+			private static const IRC_COLOR_ACTIVE:String = "#F52A0F";
+			private static const IRC_COLOR_NICK:String = "#40B830";
+			private static const IRC_COLOR_NOTICE:String = "#993333";
+			private static const IRC_COLOR_KICK:String = "#FF6666";
+				
+			//private static const IRC_SERVER = "irc.jokersupdates.com";
+			//private static const IRC_CHANNEL:String = "#JokersChat";
+			//private static const IRC_CONNECTED:String = "Welcome to the JokersNet IRC Network";
+			//private static const IRC_CONNECTED:String = "Welcome to the freenode Internet Relay Chat Network";
+			
+
+			private var isConnected:Boolean = false;
+			private var topic:String;
+			private var joined:Boolean = false;
+			
+			private var irc:IRC;
+			private static const IRC_CHANNEL:String = "#BBViewer";
+			private static const IRC_CONNECTED:String = "Looking up your hostname";
+			private var IRC_SERVER:String = "irc.freenode.net";
+			private var IRC_PORT:int = 6667;
+			private var IRC_NICK:String;
+			
+		private function init():void
+		{
+			getNick();
+			addEventListener( KeyboardEvent.KEY_UP, onKeyUp );
+		}
+		
+		private function onKeyUp( event:KeyboardEvent ):void
+		{
+			if ( isConnected && event.charCode == Keyboard.ENTER ) onSend( null );
+		}
+
+			
+		private function connect():void
+		{
+			try
+			{
+				if ( irc == null ) irc = new IRC();
+				
+				if ( !irc.isConnected() )
+				{
+					IRC_SERVER = txtServer.text;
+					IRC_PORT = parseInt(txtPort.text);
+					
+					irc.connect( IRC_SERVER, IRC_PORT, IRC_NICK );
+					
+					irc.addEventListener(IRC.EVENT_STATUSMESSAGE,statusMessageEventHandler);
+					irc.addEventListener(IRC.EVENT_SOCKOPEN, sockOpenEventHandler);
+					irc.addEventListener(IRC.EVENT_ERROR, errorEventHandler);
+				   
+					irc.addEventListener(IRC.EVENT_SOCKERROR, sockErrorEventHandler);
+					irc.addEventListener(IRC.EVENT_ACTIVEMESSAGE, activeMessageEventHandler);
+					irc.addEventListener(IRC.EVENT_PING, pingEventHandler);
+
+					irc.addEventListener(IRC.EVENT_NOTICE, noticeEventHandler);
+					irc.addEventListener(IRC.EVENT_JOIN, joinEventHandler);
+					irc.addEventListener(IRC.EVENT_PRIVMSG, privmsgEventHandler);
+					irc.addEventListener(IRC.EVENT_TOPIC, topicEventHandler);
+					irc.addEventListener(IRC.EVENT_MODE, modeEventHandler);
+					irc.addEventListener(IRC.EVENT_NICK, nickEventHandler);
+					irc.addEventListener(IRC.EVENT_KICK, kickEventHandler);
+					irc.addEventListener(IRC.EVENT_QUIT, quitEventHandler);
+					irc.addEventListener(IRC.EVENT_PART, partEventHandler);
+				} else
+				{
+					disconnect();
+				}
+			} catch ( err:Error )
+			{
+				trace( "Error during IRC init" );
+			}
+		}
+		
+		private function getNick():void
+		{
+			var sharedObject:SharedObject = SharedObject.getLocal("IRC_INFO");
+			if (sharedObject.data.nick == null)
+			{
+				IRC_NICK = randomUser();
+			} else
+			{
+				IRC_NICK = sharedObject.data.nick;
+			}
+			trace("Using saved nick: " + IRC_NICK);
+			
+		}
+		
+		private function randomUser():String
+		{
+			var rndNick:String = "BBCAViewer_" + Math.floor(Math.random() * (10000 - 1000) + 1000);
+			trace("Random Nick: " + rndNick);
+			return rndNick;
+		}
+
+		
+	
+
+		private function onSend(e:Event):void
+		{
+			if (isConnected)
+			{
+				var cmd:String = txtType.text;
+				if (cmd.charAt(0) == "/")
+				{
+					sendCommand(cmd);
+				} else
+				{
+					sendCommand("/privmsg " + IRC_CHANNEL + " :" + cmd);
+					//http://stackoverflow.com/questions/1628958/actionscript-3-textarea-htmltext-styling-using-span-tag
+					status.htmlText += "<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_OWNMSG + "\"><b>" + IRC_NICK + "</b>: " + txtType.text +"</font><br/>";
+				}
+				status.verticalScrollPosition = status.maxVerticalScrollPosition;
+				txtType.text = "";
+				txtType.setFocus();				
+			}
+		}
+		
+		
+		private function onConnect():void
+		{
+			trace("Connected!");
+			btnConnect.label = "Disconnect";
+			btnSend.enabled = true;
+			joinChannel(IRC_CHANNEL);			
+		}
+		
+		private function joinChannel(chan:String):void
+		{
+			if (IRC_NICK.indexOf("BBCAViewer_") != -1)
+			{
+				//force user to pick a name
+				lblHint.text = "You must type /nick yourname to join chat.";
+			} else
+			{
+				lblHint.text = "Username is " + IRC_NICK + ". Type /nick NewName to change it.";
+				joined = true;
+				sendCommand("/join " + chan);
+			}
+		}
+		
+		private function partChannel( chan:String ):void
+		{
+			sendCommand( "/part " + chan );
+		}
+	
+		public function noticeEventHandler(e:NoticeEvent):void
+		{    
+			traceIt("<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_NOTICE + "\">" + e.user.nick + ": " + e.type + " : " + e.text + "</font>");
+		}
+		
+		//When users join the chat
+		public function joinEventHandler(e:JoinEvent):void
+		{
+			//trace ("join event: " + e.chan + " : " + e.user.nick + " : " + e.onJoin);
+			if (e.onJoin)
+			{
+				//new join messages?
+				var msg:String = "<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_JOIN + "\">";
+				if (e.user.nick == IRC_NICK)
+				{
+					//user joined some channel
+					msg += "You have joined " + e.chan;
+					trace( "Channel: " + e.chan );
+					//autodisconnect freenode since as3irc lib connects automatically
+					if ( e.chan == "#freenode" ) partChannel( "#freenode" );
+				} else
+				{
+					msg += e.user.nick + " has joined " + e.chan;
+				}
+				msg += "</font>";
+				traceIt(msg);
+			} else
+			{
+				//what are false onJoin events?
+			}
+		}
+		
+		//When users quit the chat
+		public function quitEventHandler(e:QuitEvent):void
+		{
+			traceIt("<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_QUIT + "\">" + e.user.nick + " has left." + "</font>");
+		}
+		
+		//When a message is received
+		public function privmsgEventHandler(e:PrivmsgEvent):void
+		{
+			//if chat is for the main channel
+			
+			if (e.win == IRC_CHANNEL.substr(1,IRC_CHANNEL.length))
+			{
+				traceIt("<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_PRIVMSG + "\">" + e.user.nick + ": " + e.msg + "</font>");
+			} else
+			{
+				traceIt("<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_OTHER_CHANNEL + "\">" + "[" + e.win + "] " + e.user.nick + ": " + e.msg + "</font>");			
+			}
+		}
+
+		//When topic is changed
+		public function topicEventHandler(e:TopicEvent):void
+		{
+			if (e.msg.indexOf(" ") != -1)
+			{
+				var user:String = e.msg.split(" ")[0]
+				topic = "<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_TOPIC + "\">" + user + " sets topic to: " + topic + "</font>";
+				traceIt(topic);
+			} else
+			{
+				//we only get the new topic on the first message
+				topic = e.msg;
+				trace( "BBCAViewer chat : [" + IRC_CHANNEL + "] : " + topic );
+			}
+		}
+		
+		//When the mode is changed
+		public function modeEventHandler(e:ModeEvent):void
+		{
+			var msg:String = "<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_MODE + "\">" + "[" + e.chan + "] ";
+			if (e.user == null)
+			{
+				msg += "Your mode is set to " + e.mode;
+			} else
+			{
+				msg += e.user.nick + " sets mode " + e.mode + "for " + e.chan;
+			}
+			msg += "</font>";
+			traceIt(msg);
+		}
+		
+		public function nickEventHandler(e:NickEvent):void
+		{
+			var msg:String = "<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_NICK + "\">";
+			if (e.oldUser.nick == IRC_NICK)
+			{
+				IRC_NICK = e.newUser.nick;
+				var sharedObject:SharedObject = SharedObject.getLocal("IRC_INFO");
+				sharedObject.data.nick = IRC_NICK;
+				sharedObject.flush();
+				sharedObject.close();
+				msg += "You are now known as " + e.newUser.nick;
+				lblHint.text = "Username is " + IRC_NICK + ". Type /nick NewName to change it.";
+				if (!joined) joinChannel(IRC_CHANNEL);
+			} else
+			{
+				msg += e.oldUser.nick + " is now known as " + e.newUser.nick;
+			}
+			msg += "</font>";
+			traceIt(msg);
+		}
+		
+		public function kickEventHandler(e:KickEvent):void
+		{
+			traceIt("<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_KICK + "\">" + e.victim.nick + " was kicked by " + e.agressor.nick +  " : Reason (" + e.reason + ")</font>");
+		}
+		
+		public function sockErrorEventHandler(e:Event):void
+		{
+			
+		}
+		
+		public function pingEventHandler(e:Event):void
+		{
+			
+		}
+	   
+		public function errorEventHandler(e:IRCErrorEvent):void
+		{
+				traceIt("Error: "+e.message);
+		}
+	   
+		public function sockOpenEventHandler(e:Event):void
+		{
+				// A utiliser avec jbouncer
+				//irc.processInput("/msg root test test");
+				//irc.processInput("/msg root create freenode irc.freenode.net");                      
+		}
+	   
+		public function statusMessageEventHandler(e:Event):void
+		{
+			
+			var msg:String = irc.getLastStatusMessage();
+			if (msg != null && msg.indexOf(IRC_CONNECTED) != -1)
+			{
+				//connected
+				isConnected = true;
+				onConnect();
+			}
+			traceIt("<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_STATUS + "\">" + msg + "</font>");    
+		}
+	   
+		public function activeMessageEventHandler(e:Event):void
+		{
+			traceIt("<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_ACTIVE + "\">" + irc.getLastActiveMessage() + "</font>");    
+		}
+	   
+		public function partEventHandler( e:PartEvent ):void
+		{
+				//chan
+				//msg
+				//user
+				var msg:String = "<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + IRC_COLOR_PART + "\">";
+				if (e.user.nick == IRC_NICK)
+				{
+					//user joined some channel
+					msg += "You have left " + e.chan;
+				} else
+				{
+					msg += e.user.nick + " has left " + e.chan;
+				}
+				msg += "</font>";
+				traceIt(msg);
+		}
+		
+		public function sendCommand(cmd:String):void
+		{
+				irc.processInput(cmd);
+		}
+		
+		public function traceIt(ms:String):void
+		{
+			//colorize(ms);
+			
+			var scroll:Boolean = false;
+			if (status.verticalScrollPosition == status.maxVerticalScrollPosition) scroll = true;
+			
+			status.htmlText += ms +"<br/>";
+			
+			//if user was already at the bottom, keep scrolling the window
+			if (scroll)
+			{
+				status.verticalScrollPosition = status.maxVerticalScrollPosition;
+			} else
+			{
+				//let user know there is some new stuff
+				//status.textField.opaqueBackground = 0xffdddd;
+			}
+		}
+		
+		private function colorize(ms:String):void
+		{
+			//color(ms, "", "#0000ff");
+		}
+		
+		private function color(ms:String, match:String, color:String):void
+		{
+			var oldString:String = ms;
+			
+			var idxMatch:int = ms.indexOf(match);
+			if (idxMatch != -1)
+			{
+				ms.replace(match, "<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + color + "\">"); 
+				/*
+				startString = ms.slice(0,idxMatch);
+				startString += "<font size=\""+ IRC_FONT_SIZE + "\" color=\"" + color + "\">";
+				var idxNext:int = ms.indexOf("");
+				if (idxNext != -1)
+				{
+					endString = "</font>" + ms.slice(idxNext + 1, ms.length);
+				} else
+				{
+					endString = ms.slice(idxMatch + 1, ms.length);
+				}
+				endString.replace("<br/>", "</font><br/>");
+				*/
+			}
+			trace("Old String: " + oldString);
+			trace("New String: " + ms);
+		}
+				
+		
+		private function disconnect():void
+		{
+			try
+			{
+				irc.disconnect();
+				btnConnect.label = "Connect";
+				btnSend.enabled = false;
+			} catch ( err:Error )
+			{
+				trace("Not clean IRC disconnect");
+			}
+		}
+		
+		private function wrapup():void
+		{
+			disconnect();
+		}
+		
+		]]>
+	</fx:Script>
+	<s:Rect width="100%" height="100%">
+		<s:fill><s:SolidColor color="0x999999" /></s:fill>
+	</s:Rect>
+	<s:VGroup width="100%" height="100%">
+		<mx:Label id="lblHint" width="100%" />
+		<s:HGroup width="100%">
+			<s:TextInput id="txtServer" text="irc.freenode.net" width="80%" />
+			<s:TextInput id="txtPort" text="6667" width="20%" />
+		</s:HGroup>
+		<s:Button id="btnConnect" label="Connect" click="connect()" width="100%" />
+		<s:HGroup width="100%">
+			<mx:TextInput id="txtType" width="100%" text="" />
+			<s:Button id="btnSend" label="Send" click="onSend(event)" />
+		</s:HGroup>
+		<mx:TextArea id="status" width="100%" height="100%" />
+	</s:VGroup>
+</s:Group>
