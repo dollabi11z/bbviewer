@@ -11,6 +11,7 @@
 	<fx:Script>
 		<![CDATA[
 			import flash.events.Event;
+			import flash.events.NetStatusEvent;
 			import flash.media.Sound;
 			import flash.media.SoundTransform;
 			import flash.net.NetStream;
@@ -51,6 +52,8 @@
 			private var dataTimer:Timer;
 			private var playerData:VideoDataObject = new VideoDataObject();
 			private var netstream:NetStream;
+			private var delayedSeek:Boolean;
+			private var delayedSeekSecs:Number;
 
 			private function init():void
 			{
@@ -166,15 +169,57 @@
 					case LoadState.READY:
 						//load netstream
 						var nsLoadTrait:NetStreamLoadTrait = mediaPlayer.media.getTrait(MediaTraitType.LOAD) as NetStreamLoadTrait;
-						if ( nsLoadTrait != null ) netstream = nsLoadTrait.netStream;
-						//add stream listeners
+						if ( nsLoadTrait != null )
+						{
+							netstream = nsLoadTrait.netStream;
+							addNetStreamListeners();
+						}
 						break;
 				}
 				
 			}
 			
-			public function load( url:String ):void
+			private function addNetStreamListeners():void
 			{
+				if ( netstream != null )
+				{
+					netstream.addEventListener( NetStatusEvent.NET_STATUS, onNetStatusEvent );
+				}
+			}
+			
+			private function removeNetStreamListeners():void
+			{
+				if ( netstream != null )
+				{
+					netstream.removeEventListener( NetStatusEvent.NET_STATUS, onNetStatusEvent );
+				}
+			}
+			
+			private function onNetStatusEvent( event:NetStatusEvent ):void
+			{
+				switch( event.info.code )
+				{
+					case "NetStream.Play.Transition":
+						if ( delayedSeek )
+						{
+							Main.logger.log( "Processing delayed seek: " + delayedSeekSecs );
+							seek( delayedSeekSecs );
+							delayedSeek = false;
+							delayedSeekSecs = 0;
+						}
+						break;
+				}
+			}
+			
+			public function load( url:String, seek:Number = 0 ):void
+			{
+				//we will seek after load
+				if ( seek > 0 )
+				{
+					delayedSeek = true;
+					delayedSeekSecs = seek;
+				}
+				
 				var mediaElement:MediaElement;
 				if ( url.indexOf("youtube.com") > 0 )
 				{
@@ -218,9 +263,9 @@
 			
 			public function onResize( event:Event ):void
 			{
+				videoContainer.width = stage.stageWidth;
+				videoContainer.height = stage.stageHeight;
 				if (mediaContainer != null) {
-					videoContainer.width = this.width;
-					videoContainer.height = this.height;
 					mediaContainer.width = videoContainer.width;
 					mediaContainer.height = videoContainer.height;
 				}
@@ -287,6 +332,7 @@
 			private function stopVideo():void
 			{
 				if ( mediaPlayer.playing ) mediaPlayer.stop();
+				removeNetStreamListeners();
 			}
 			
 			public function toggleAutoDynamicSwitching():void

@@ -15,7 +15,7 @@ package
 			super();
 		}
 		
-		override public function getLogger(category:String):Logger
+		override public function getLogger(category:String):org.osmf.logging.Logger
         {
             return new SimpleLogger(category);
         }

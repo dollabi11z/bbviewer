@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- containers\spark\myComponents\MySimpleCustomItemRenderer.mxml -->
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+    xmlns:mx="library://ns.adobe.com/flex/mx" 
+    xmlns:s="library://ns.adobe.com/flex/spark"
+	width="100%"
+	click="onFlashbackClick(event)" >
+	<fx:Script>
+		<![CDATA[
+			import flash.events.Event;
+
+			private function onFlashbackClick(event:Event):void
+			{
+				//TODO if already playing this url, we should't reload it
+				if ( data.url != null ) ( parentApplication as WindowContent ).video.load( data.url, data.seek );
+				( parentApplication as WindowContent ).flashbacks.close();
+			}
+		
+		]]>
+	</fx:Script>
+    <s:states> 
+        <s:State name="normal"/> 
+        <s:State name="hovered"/> 
+    </s:states> 
+    <s:VGroup verticalCenter="1">
+		<s:Label id="flashbackLabel" height="16" text="{data.label}" verticalAlign="middle" /> 
+	</s:VGroup>
+</s:ItemRenderer>
