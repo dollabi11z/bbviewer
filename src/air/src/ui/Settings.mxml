@@ -3,9 +3,7 @@
                xmlns:s="library://ns.adobe.com/flex/spark" 
                xmlns:mx="library://ns.adobe.com/flex/mx"
 			   xmlns:local="*"
-			   xmlns:ui="ui.*"
-			   width="50%"
-			   height="50%">
+			   xmlns:ui="ui.*">
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->		
@@ -180,7 +178,7 @@
 		<s:fill><s:SolidColor color="0x1B1B1B" alpha="0.8" /></s:fill>
 	</s:Rect>
 	
-	<s:VGroup gap="2" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5">
+	<s:VGroup gap="2" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
 		<s:HGroup gap="5" verticalCenter="1" verticalAlign="middle">
 			<!-- Setting Descriptions -->
 			<s:VGroup>
@@ -190,15 +188,15 @@
 			</s:VGroup>
 			<!-- Setting Controls -->
 			<s:VGroup>
-				<mx:Image id="imgPinned" buttonMode="true" mouseChildren="false" source="{toggle_off}" click="toggleAlwaysOnTop()" />
+				<mx:Image id="imgPinned" width="64" buttonMode="true" mouseChildren="false" source="{toggle_off}" click="toggleAlwaysOnTop()" />
 				<s:HGroup gap="5" verticalCenter="1" verticalAlign="middle">
-					<mx:Image id="imgAutoSwitch" buttonMode="true" mouseChildren="false" source="{toggle_on}" click="toggleAutoDynamicSwitching()" />
+					<mx:Image id="imgAutoSwitch" width="64" buttonMode="true" mouseChildren="false" source="{toggle_on}" click="toggleAutoDynamicSwitching()" />
 					<s:DropDownList id="cmbQualities" dataProvider="{bitrates}" enabled="false" />
 				</s:HGroup>
 				<s:HGroup height="32" gap="0" verticalCenter="1" verticalAlign="middle">
-					<mx:Image id="imgAudioLeft" width="24" buttonMode="true" mouseChildren="false" enabled="false" source="{audio_left_disabled}" click="setPan(-1)" />
-					<mx:Image id="imgAudioMid" width="24" buttonMode="true" mouseChildren="false" enabled="false" source="{audio_mid_disabled}" click="setPan(0)" />
-					<mx:Image id="imgAudioRight" width="24" buttonMode="true" mouseChildren="false" enabled="false" source="{audio_right_disabled}" click="setPan(1)" />
+					<mx:Image id="imgAudioLeft" width="32" buttonMode="true" mouseChildren="false" enabled="false" source="{audio_left_disabled}" click="setPan(-1)" />
+					<mx:Image id="imgAudioMid" width="27" buttonMode="true" mouseChildren="false" enabled="false" source="{audio_mid_disabled}" click="setPan(0)" />
+					<mx:Image id="imgAudioRight" width="32" buttonMode="true" mouseChildren="false" enabled="false" source="{audio_right_disabled}" click="setPan(1)" />
 				</s:HGroup>
 			</s:VGroup>
 		</s:HGroup>

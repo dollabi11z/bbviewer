@@ -122,6 +122,17 @@
 					volume.visible = true;
 				}
 			}
+			
+			private function toggleAngles():void
+			{
+				playerAngles.visible = !playerAngles.visible;
+			}
+			
+			public function toggleSettings():void
+			{
+				playerSettings.visible = !playerSettings.visible;
+			}
+			
 		]]>
 	</fx:Script>
 	<!-- Background -->
@@ -130,21 +141,16 @@
 	<!-- Left side controls -->
 	<!-- Right side controls -->
 
-	<!--
-	<ui:AlternateAngles id="playerAngles" width="100%" top="-50" visible="false" />
-
+	<ui:AlternateAngles id="playerAngles" bottom="52" right="5" visible="false" />
+	<ui:Settings id="playerSettings" bottom="52" right="5" visible="false" />
 	
-	
-	
-	-->
-	
-	<s:Group top="16" width="100%" height="100%">
-		<s:Rect width="100%" height="100%">
-			<s:fill><s:SolidColor color="0x1B1B1B" alpha="0.8" /></s:fill>
+	<s:Group width="100%" bottom="0">
+		<s:Rect width="100%" height="52">
+			<s:fill><s:SolidColor color="0x1B1B1B" alpha="0.9" /></s:fill>
 		</s:Rect>
 	</s:Group>
 	
-	<s:Group id="slider" width="100%" height="24" bottom="47"
+	<s:Group id="slider" width="100%" height="24" bottom="45"
 			mouseDown="startProgressDrag(event)"
 			mouseMove="doProgressDrag(event)"
 			mouseUp="endProgressDrag(event)"
@@ -168,9 +174,10 @@
 			/>
 	</s:Group>
 	
-	<s:HGroup width="100%" top="20" verticalAlign="middle" horizontalAlign="center">
+	<s:HGroup width="100%" bottom="32" verticalAlign="middle" horizontalAlign="center">
 		<mx:Text id="txtState"
 						focusEnabled="false"
+						selectable="false"
 						text="This is the text"
 						styleName="smallText"
 						filters="{[new DropShadowFilter(2, 33)]}"
@@ -251,8 +258,22 @@
 			imageDisabled="@Embed(source='../assets/images/forward_disabled.png')" />	
 	</s:HGroup>
 	
-	<s:HGroup bottom="0" minWidth="64" right="0" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5">
-		<ui:ImageButton id="settings" click="parentApplication.toggleSettings()" right="0"
+	<s:HGroup bottom="0" minWidth="128" right="0" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5">
+		<ui:ImageButton id="bookmarks" right="0"
+			width="32" height="32"
+			skinClass="ui.ImageButtonSkin"
+			image="@Embed(source='../assets/images/bookmarks_normal.png')"
+			imageDown="@Embed(source='../assets/images/bookmarks_down.png')"
+			imageOver="@Embed(source='../assets/images/bookmarks_over.png')"
+			imageDisabled="@Embed(source='../assets/images/bookmarks_disabled.png')" />
+		<ui:ImageButton id="angles" click="toggleAngles()" right="0"
+			width="32" height="32"
+			skinClass="ui.ImageButtonSkin"
+			image="@Embed(source='../assets/images/angles_normal.png')"
+			imageDown="@Embed(source='../assets/images/angles_down.png')"
+			imageOver="@Embed(source='../assets/images/angles_over.png')"
+			imageDisabled="@Embed(source='../assets/images/angles_disabled.png')" />
+		<ui:ImageButton id="settings" click="toggleSettings()" right="0"
 			width="32" height="32"
 			skinClass="ui.ImageButtonSkin"
 			image="@Embed(source='../assets/images/settings_normal.png')"

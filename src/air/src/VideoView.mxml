@@ -305,17 +305,17 @@
 			
 			public function seek( toSecs:Number ):void
 			{
-				if ( mediaPlayer != null && mediaPlayer.media != null ) mediaPlayer.seek( toSecs );
+				if ( mediaPlayer != null && mediaPlayer.media != null && mediaPlayer.canSeek ) mediaPlayer.seek( toSecs );
 			}
 			
 			public function backwards( secs:Number ):void
 			{
-				if ( mediaPlayer != null && mediaPlayer.media != null ) mediaPlayer.seek( mediaPlayer.currentTime - secs );
+				if ( mediaPlayer != null && mediaPlayer.media != null && mediaPlayer.canSeek ) mediaPlayer.seek( mediaPlayer.currentTime - secs );
 			}
 			
 			public function forward( secs:Number ):void
 			{
-				if ( mediaPlayer != null && mediaPlayer.media != null ) mediaPlayer.seek( mediaPlayer.currentTime + secs );
+				if ( mediaPlayer != null && mediaPlayer.media != null && mediaPlayer.canSeek ) mediaPlayer.seek( mediaPlayer.currentTime + secs );
 			}
 			
 			public function pause():void
@@ -362,7 +362,7 @@
 				playerData.numDynamicStreams = mediaPlayer.numDynamicStreams;
 				
 				( parentApplication as WindowContent ).playerControls.onData( playerData );
-				( parentApplication as WindowContent ).playerSettings.onData( playerData );
+				( parentApplication as WindowContent ).playerControls.playerSettings.onData( playerData );
 			}
 			
 		]]>

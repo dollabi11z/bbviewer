@@ -22,10 +22,10 @@
 	</s:Rect>
 	
 	<!-- Alternate Camera controls -->
-	<s:VGroup verticalCenter="1">
-		<mx:Text text="Cam1" styleName="smallText" />
-		<mx:Text text="Cam2" styleName="smallText" />
-		<mx:Text text="Cam3" styleName="smallText" />
-		<mx:Text text="Cam4" styleName="smallText" />
+	<s:VGroup gap="2" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
+		<mx:Text text="Cam1" styleName="smallText" selectable="false" />
+		<mx:Text text="Cam2" styleName="smallText" selectable="false" />
+		<mx:Text text="Cam3" styleName="smallText" selectable="false" />
+		<mx:Text text="Cam4" styleName="smallText" selectable="false" />
 	</s:VGroup>
 </s:Group>

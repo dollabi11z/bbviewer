@@ -33,12 +33,14 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import channel.Channel;
 			import flash.display.NativeWindow;
 			import flash.events.KeyboardEvent;
 			import flash.ui.Keyboard;
 			import flash.net.URLRequest;
 			import flash.sampler.DeleteObjectSample;
 			import flash.utils.Timer;
+			import mx.collections.ArrayCollection;
 			import mx.core.IRawChildrenContainer;
 			import mx.events.MenuEvent;
 			
@@ -47,7 +49,7 @@
 			private static const defaultWindowTitle:String = "BBViewer";
 			private var nativeWindow:ExtendedNativeWindow;
 			private var disableHotkeys:Boolean = false;
-
+			
 			private function init():void
 			{
 				stage.color = 0x000000;
@@ -100,10 +102,6 @@
 				playerControls.visible = !playerControls.visible;
 				appMenu.visible = !appMenu.visible
 			}
-			public function toggleSettings():void
-			{
-				playerSettings.visible = !playerSettings.visible;
-			}
 			
 			public function toggleFullscreen():void
 			{
@@ -154,7 +152,6 @@
 	<!-- Still a ways to go, just the basic stuff is there -->
 	<ui:Chat id="chat" width="33%" height="100%" visible="false" />
 	<ui:Controls id="playerControls" width="100%" bottom="0" />
-	<ui:Settings id="playerSettings" bottom="61" right="10" visible="false" />
 	<ui:Help id="help" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<ui:Channels id="channels" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<ui:Flashbacks id="flashbacks" top="30" verticalCenter="1" horizontalCenter="1" visible="false" />
