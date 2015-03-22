@@ -1,0 +1,77 @@
+<s:Group
+	xmlns:fx="http://ns.adobe.com/mxml/2009"
+	xmlns:s="library://ns.adobe.com/flex/spark"
+	xmlns:mx="library://ns.adobe.com/flex/mx"
+	xmlns:local="*"
+	addedToStage="init()"
+	width="100%"
+	height="100%">
+		
+	<fx:Script>
+		<![CDATA[
+			import flash.utils.Timer;
+			import flash.events.TimerEvent;
+			
+			private var msgTimer:Timer;
+			public function init():void
+			{
+				//Timer to send data to interested listeners every second
+				msgTimer = new Timer(5000, 1);
+				msgTimer.addEventListener(TimerEvent.TIMER, onHideMessage);
+				msgTimer.start();
+			}
+			public function onHideMessage(event:TimerEvent):void
+			{
+					msgbox.visible = false;
+			}
+			
+			public function show( message:String, type:String, length:Number ):void
+			{
+				error.visible = ( type == MessageBoxType.ERROR ) ? true : false;
+				success.visible = ( type == MessageBoxType.SUCCESS ) ? true : false;
+				info.visible = ( type == MessageBoxType.INFO ) ? true : false;
+				
+				msg.text = message;
+				msgbox.visible = true;
+				msgTimer.delay = length * 1000;
+				msgTimer.reset();
+				msgTimer.start();
+			}
+			
+			public function hide():void
+			{
+				msgbox.visible = false;
+			}
+			
+		]]>
+	</fx:Script>
+	<s:Group id="msgbox" verticalCenter="1" horizontalCenter="1" visible="false">
+		<s:Rect id="error" width="100%" height="100%" visible="false">
+			 <s:fill>
+				 <mx:SolidColor color="0xa92f1b" />
+			 </s:fill>
+			 <s:stroke>
+				<mx:SolidColorStroke color="0xEFEFEF" weight="2" />
+			 </s:stroke>
+		</s:Rect>
+		<s:Rect id="success" width="100%" height="100%" visible="false">
+			 <s:fill>
+				 <mx:SolidColor color="0x158732" />
+			 </s:fill>
+			 <s:stroke>
+				<mx:SolidColorStroke color="0xEFEFEF" weight="2" />
+			 </s:stroke>
+		</s:Rect>
+		<s:Rect id="info" width="100%" height="100%" visible="false">
+			 <s:fill>
+				 <mx:SolidColor color="0x1b89a9" />
+			 </s:fill>
+			 <s:stroke>
+				<mx:SolidColorStroke color="0xEFEFEF" weight="2" />
+			 </s:stroke>
+		</s:Rect>
+		<s:VGroup paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+			<s:Label id="msg" text="Message goes here" styleName="normalText" horizontalCenter="1" />
+		</s:VGroup>
+	</s:Group>
+</s:Group>

@@ -25,6 +25,12 @@
             fontSize: 10;
             color: #dfdfdf;
         }
+
+		.normalText {
+			fontFamily: UbuntuFont;
+            fontSize: 14;
+            color: #dfdfdf;
+        }
 	</fx:Style>
 	
 	<fx:Script>

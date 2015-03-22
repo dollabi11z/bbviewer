@@ -156,5 +156,6 @@
 	<ui:Channels id="channels" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<ui:Flashbacks id="flashbacks" top="30" verticalCenter="1" horizontalCenter="1" visible="false" />
 	<mx:MenuBar x="0" y="0" width="100%" id="appMenu" labelField="@label" itemClick="onMenuItemClick(event)" dataProvider="{menuXML}" />
+	<ui:Message id="messages" width="100%" height="100%" top="30" />
 	
 </s:Group>
