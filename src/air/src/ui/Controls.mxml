@@ -259,13 +259,6 @@
 	</s:HGroup>
 	
 	<s:HGroup bottom="0" minWidth="128" right="0" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5">
-		<ui:ImageButton id="bookmarks" right="0"
-			width="32" height="32"
-			skinClass="ui.ImageButtonSkin"
-			image="@Embed(source='../assets/images/bookmarks_normal.png')"
-			imageDown="@Embed(source='../assets/images/bookmarks_down.png')"
-			imageOver="@Embed(source='../assets/images/bookmarks_over.png')"
-			imageDisabled="@Embed(source='../assets/images/bookmarks_disabled.png')" />
 		<ui:ImageButton id="angles" click="toggleAngles()" right="0"
 			width="32" height="32"
 			skinClass="ui.ImageButtonSkin"
@@ -273,6 +266,13 @@
 			imageDown="@Embed(source='../assets/images/angles_down.png')"
 			imageOver="@Embed(source='../assets/images/angles_over.png')"
 			imageDisabled="@Embed(source='../assets/images/angles_disabled.png')" />
+		<ui:ImageButton id="bookmarks" right="0"
+			width="32" height="32"
+			skinClass="ui.ImageButtonSkin"
+			image="@Embed(source='../assets/images/bookmarks_normal.png')"
+			imageDown="@Embed(source='../assets/images/bookmarks_down.png')"
+			imageOver="@Embed(source='../assets/images/bookmarks_over.png')"
+			imageDisabled="@Embed(source='../assets/images/bookmarks_disabled.png')" />
 		<ui:ImageButton id="settings" click="toggleSettings()" right="0"
 			width="32" height="32"
 			skinClass="ui.ImageButtonSkin"
