@@ -402,7 +402,7 @@
 		{
 			try
 			{
-				irc.disconnect();
+				if ( irc != null ) irc.disconnect();
 				btnConnect.label = "Connect";
 				btnSend.enabled = false;
 			} catch ( err:Error )
