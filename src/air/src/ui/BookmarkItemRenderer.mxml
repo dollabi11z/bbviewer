@@ -13,7 +13,7 @@
 			{
 				//TODO if already playing this url, we should't reload it
 				if ( data.url != null ) ( parentApplication as WindowContent ).video.load( data.url, data.seek );
-				( parentApplication as WindowContent ).flashbacks.close();
+				( parentApplication as WindowContent ).bookmarks.close();
 			}
 		
 		]]>

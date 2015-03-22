@@ -46,7 +46,10 @@
 			import flash.utils.Timer;
 			import mx.core.Window;
 			import Logger;
-			
+
+			public static const SKIP_SHORT:Number = 15;
+			public static const SKIP_LONG:Number = 60;
+				
 			public static var logger:Logger;
 			private static const initialWidth:Number = 640;
 			private static const initialHeight:Number = 360;

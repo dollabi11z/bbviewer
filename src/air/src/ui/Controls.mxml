@@ -19,9 +19,6 @@
 			import flash.events.Event;
 			import objects.VideoDataObject;
 
-			private static const SKIP_SHORT:Number = 15;
-			private static const SKIP_LONG:Number = 60;
-			
 			private var mIsDragging:Boolean = false;
 			private var mProgressPosition:Number;
 			private var lastVideoData:VideoDataObject;
@@ -105,7 +102,7 @@
 				}
 			}
 			
-			private function mute():void
+			public function mute():void
 			{
 				if ( ( parentApplication as WindowContent ).video.mute() )
 				{
@@ -114,7 +111,7 @@
 				}
 			}
 			
-			private function unmute():void
+			public function unmute():void
 			{
 				if ( ( parentApplication as WindowContent ).video.unmute() )
 				{
@@ -228,28 +225,28 @@
 	</s:HGroup>
 	
 	<s:HGroup bottom="0" paddingTop="5" paddingLeft="5" paddingRight="5" paddingBottom="5" horizontalCenter="1">
-		<ui:ImageButton id="back" click="parentApplication.video.backwards(SKIP_LONG)"
+		<ui:ImageButton id="back" click="parentApplication.video.backwards(Main.SKIP_LONG)"
 			width="32" height="32"
 			skinClass="ui.ImageButtonSkin"
 			image="@Embed(source='../assets/images/back_normal.png')"
 			imageDown="@Embed(source='../assets/images/back_down.png')"
 			imageOver="@Embed(source='../assets/images/back_over.png')"
 			imageDisabled="@Embed(source='../assets/images/back_disabled.png')" />
-		<ui:ImageButton id="jumpback" click="parentApplication.video.backwards(SKIP_SHORT)"
+		<ui:ImageButton id="jumpback" click="parentApplication.video.backwards(Main.SKIP_SHORT)"
 			width="32" height="32"
 			skinClass="ui.ImageButtonSkin"
 			image="@Embed(source='../assets/images/jumpback_normal.png')"
 			imageDown="@Embed(source='../assets/images/jumpback_down.png')"
 			imageOver="@Embed(source='../assets/images/jumpback_over.png')"
 			imageDisabled="@Embed(source='../assets/images/jumpback_disabled.png')" />
-		<ui:ImageButton id="jumpforward" click="parentApplication.video.forward(SKIP_SHORT)"
+		<ui:ImageButton id="jumpforward" click="parentApplication.video.forward(Main.SKIP_SHORT)"
 			width="32" height="32"
 			skinClass="ui.ImageButtonSkin"
 			image="@Embed(source='../assets/images/jumpforward_normal.png')"
 			imageDown="@Embed(source='../assets/images/jumpforward_down.png')"
 			imageOver="@Embed(source='../assets/images/jumpforward_over.png')"
 			imageDisabled="@Embed(source='../assets/images/jumpforward_disabled.png')" />
-		<ui:ImageButton id="forward" click="parentApplication.video.forward(SKIP_LONG)"
+		<ui:ImageButton id="forward" click="parentApplication.video.forward(Main.SKIP_LONG)"
 			width="32" height="32"
 			skinClass="ui.ImageButtonSkin"
 			image="@Embed(source='../assets/images/forward_normal.png')"
@@ -266,7 +263,7 @@
 			imageDown="@Embed(source='../assets/images/angles_down.png')"
 			imageOver="@Embed(source='../assets/images/angles_over.png')"
 			imageDisabled="@Embed(source='../assets/images/angles_disabled.png')" />
-		<ui:ImageButton id="bookmarks" right="0"
+		<ui:ImageButton id="bookmarks" click="parentApplication.toggleBookmarks()" right="0"
 			width="32" height="32"
 			skinClass="ui.ImageButtonSkin"
 			image="@Embed(source='../assets/images/bookmarks_normal.png')"

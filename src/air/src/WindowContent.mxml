@@ -23,7 +23,7 @@
 				<item id="sizeFullscreen" label="Fullscreen" />
 			</menu>
 			<menu label="Tools">
-				<item id="showflashbacks" label="Flashbacks" />
+				<item id="showbookmarks" label="Bookmarks" />
 				<item id="showchat" label="IRC Chat" />
 				<item id="help" label="Help" />
 			</menu>
@@ -36,6 +36,7 @@
 			import channel.Channel;
 			import flash.display.NativeWindow;
 			import flash.events.KeyboardEvent;
+			import flash.events.TimerEvent;
 			import flash.ui.Keyboard;
 			import flash.net.URLRequest;
 			import flash.sampler.DeleteObjectSample;
@@ -43,17 +44,72 @@
 			import mx.collections.ArrayCollection;
 			import mx.core.IRawChildrenContainer;
 			import mx.events.MenuEvent;
+			import flash.events.MouseEvent;
+			import flash.events.Event;
+			import flash.ui.Mouse;
 			
 			import mx.events.ResizeEvent;
 			
 			private static const defaultWindowTitle:String = "BBViewer";
 			private var nativeWindow:ExtendedNativeWindow;
 			private var disableHotkeys:Boolean = false;
+			private var delayHideTimer:Timer;
+			private var disableMouseMove:Boolean;
+			private var hasMouseLeft:Boolean;
 			
 			private function init():void
 			{
 				stage.color = 0x000000;
+				
 				stage.addEventListener( KeyboardEvent.KEY_UP, onKeyUp );
+				stage.addEventListener( MouseEvent.MOUSE_MOVE, onMouseMove );
+				stage.addEventListener( Event.MOUSE_LEAVE, onMouseLeave );
+				
+				//timer for delayed ui hiding
+				delayHideTimer = new Timer( 7000, 1 );
+				delayHideTimer.addEventListener( TimerEvent.TIMER, onDelayHide );
+			}
+			
+			//when mouse is over the window, reset the delay timer
+			private function onMouseMove( event:MouseEvent ):void
+			{
+				if ( !disableMouseMove )
+				{
+					showUI();
+					hasMouseLeft = false;
+					delayHideTimer.reset();
+					delayHideTimer.start();
+				}
+			}
+			
+			//keep track of when mouse leaves window
+			private function onMouseLeave( event:Event ):void
+			{
+				hasMouseLeft = true;
+				onDelayHide( null );
+			}
+			
+			//hide the ui after a delay
+			private function onDelayHide( event:TimerEvent ):void
+			{
+				delayHideTimer.reset();
+				hideUI();
+			}
+			
+			//hides ui elements
+			private function hideUI():void
+			{
+				appMenu.visible = false;
+				playerControls.visible = false;
+				if ( Mouse.supportsCursor && !hasMouseLeft ) Mouse.hide();
+			}
+			
+			//shows ui elements
+			private function showUI():void
+			{
+				playerControls.visible = true;
+				appMenu.visible = true;
+				if ( Mouse.supportsCursor ) Mouse.show();
 			}
 			
 			private function onMenuItemClick(event:MenuEvent):void
@@ -70,7 +126,7 @@
 				if ( event.item.@id == "ontop" ) toggleAlwaysOnTop();
 				
 				//Tools menu
-				if ( event.item.@id == "showflashbacks" ) toggleFlashbacks();
+				if ( event.item.@id == "showbookmarks" ) toggleBookmarks();
 				if ( event.item.@id == "showchat" ) toggleChat();
 				if ( event.item.@id == "help" ) showHelp();
             }
@@ -79,7 +135,22 @@
 			{
 				if ( !disableHotkeys )
 				{
-					if ( event.keyCode == Keyboard.ESCAPE ) toggleControls();
+					if ( event.keyCode == Keyboard.A ) playerControls.playerSettings.toggleAlwaysOnTop();
+					if ( event.keyCode == Keyboard.M ) playerControls.mute();
+					if ( event.keyCode == Keyboard.N ) Main.createNativeWindow( stage.nativeWindow.x - 20, stage.nativeWindow.y - 20 );
+					
+					if ( event.keyCode == Keyboard.Q ) playerControls.playerSettings.setPan( -1 );
+					if ( event.keyCode == Keyboard.W ) playerControls.playerSettings.setPan( 0 );
+					if ( event.keyCode == Keyboard.E ) playerControls.playerSettings.setPan( 1 );
+					
+					if ( event.keyCode == Keyboard.TAB ) toggleBookmarks();
+					
+					if ( event.keyCode == Keyboard.LEFT ) video.backwards(Main.SKIP_LONG);
+					if ( event.keyCode == Keyboard.RIGHT ) video.forward(Main.SKIP_LONG);
+					if ( event.keyCode == Keyboard.COMMA ) video.backwards(Main.SKIP_SHORT);
+					if ( event.keyCode == Keyboard.PERIOD ) video.forward(Main.SKIP_SHORT);
+					
+					if ( event.keyCode == Keyboard.SPACE ) video.togglePause();
 				}
 			}
 			
@@ -95,12 +166,6 @@
 			public function toggleAlwaysOnTop():void
 			{
 				stage.nativeWindow.alwaysInFront = !stage.nativeWindow.alwaysInFront;
-			}
-			
-			public function toggleControls():void
-			{
-				playerControls.visible = !playerControls.visible;
-				appMenu.visible = !appMenu.visible
 			}
 			
 			public function toggleFullscreen():void
@@ -119,9 +184,9 @@
 				chat.visible = !chat.visible;
 			}
 			
-			public function toggleFlashbacks():void
+			public function toggleBookmarks():void
 			{
-				flashbacks.visible = !flashbacks.visible;
+				bookmarks.visible = !bookmarks.visible;
 			}
 			
 			private function showChannels():void
@@ -154,7 +219,7 @@
 	<ui:Controls id="playerControls" width="100%" bottom="0" />
 	<ui:Help id="help" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<ui:Channels id="channels" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
-	<ui:Flashbacks id="flashbacks" top="30" verticalCenter="1" horizontalCenter="1" visible="false" />
+	<ui:Bookmarks id="bookmarks" top="30" verticalCenter="1" horizontalCenter="1" visible="false" />
 	<mx:MenuBar x="0" y="0" width="100%" id="appMenu" labelField="@label" itemClick="onMenuItemClick(event)" dataProvider="{menuXML}" />
 	<ui:Message id="messages" width="100%" height="100%" top="30" />
 	

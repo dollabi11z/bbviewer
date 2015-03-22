@@ -340,13 +340,17 @@
 			
 			public function pause():void
 			{
-				trace( "pause: " + mediaPlayer.playing );
 				if ( mediaPlayer.playing ) mediaPlayer.pause();
 			}
 			
 			public function play():void
 			{
 				if ( mediaPlayer.paused ) mediaPlayer.play();
+			}
+			
+			public function togglePause():void
+			{
+				if ( mediaPlayer.playing ) pause() else if ( mediaPlayer.paused ) play();
 			}
 			
 			private function stopVideo():void
