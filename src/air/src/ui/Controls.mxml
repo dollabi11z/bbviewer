@@ -19,8 +19,11 @@
 			import flash.events.Event;
 			import objects.VideoDataObject;
 
-			private var mIsDragging:Boolean = false;
-			private var mProgressPosition:Number;
+			private var sliders:Object = {
+				volume: { isDragging: false },
+				seekbar: { isDragging: false }
+			}
+						
 			private var lastVideoData:VideoDataObject;
 			
 			//update controls based on state change
@@ -33,7 +36,7 @@
 					pause.visible = true;
 					var maxDistance:Number = ( slider.width - ( slidercontrol.width / 2 ) );
 					sliderprogress.width =  maxDistance * ( data.currentTime / data.duration );
-					if ( !mIsDragging && !data.seeking )
+					if ( !sliders.seekbar.isDragging && !data.seeking )
 					{
 						//update the slider control location
 						slidercontrol.x = sliderprogress.width - ( slidercontrol.width / 2 );
@@ -49,26 +52,66 @@
 				
 			}
 			
-			public function startProgressDrag( event:MouseEvent ):void
+			//handle start drag for custom sliders
+			public function startProgressDrag( event:MouseEvent, which:String ):void
 			{
-				mProgressPosition = slidercontrol.x;
-				mIsDragging = true;
-				doProgressDrag( event );
+				sliders[which].isDragging = true;
+				doProgressDrag( event, which );
 			}
 			
-			public function doProgressDrag( event:MouseEvent ):void
+			//handle progress of drag for custom sliders
+			public function doProgressDrag( event:MouseEvent, which:String ):void
 			{
-				if ( mIsDragging ) slidercontrol.x = event.stageX - ( slidercontrol.width / 2 );
+				if ( sliders[which].isDragging )
+				{
+					switch( which )
+					{
+						case "volume":
+							var progressLoc:Number = event.stageX - volume_slider.x;
+							//check constraints to stop drag
+							if ( progressLoc <= -5 ||
+								 progressLoc >= volume_slider.width + 5 ||
+								 event.localY <= 1 ||
+								 event.localY >= volume_slider.height - 1 )
+								 endProgressDrag( event, which );
+								 // ||
+								 // event.stageY - volume_slider.y <= -10 ||
+								 // event.stageY - volume_slider.height >= 10
+							
+							if ( progressLoc < 0 ) progressLoc = 0;
+							if ( progressLoc > volume_slider.width ) progressLoc = volume_slider.width;
+							volumesliderprogress.width = progressLoc;
+							volumeslidercontrol.x = progressLoc - ( volumeslidercontrol.width / 2 );
+							
+							//set the new volume
+							( parentApplication as WindowContent ).video.setVolume( getCurrentVolume() );
+						
+							break;
+						case "seekbar":
+							slidercontrol.x = event.stageX - ( slidercontrol.width / 2 );
+							break;
+					}
+				} else
+				{
+					sliders[which].isDragging = false;
+				}
 			}
 			
-			public function endProgressDrag( event:MouseEvent ):void
+			//handle end of drag for custom sliders
+			public function endProgressDrag( event:MouseEvent, which:String ):void
 			{
-				doProgressDrag( event );
-				sliderprogress.width = event.stageX;
-				mIsDragging = false;
+				//doProgressDrag( event, which );
+				sliders[which].isDragging = false;
 				
-				var seekSecs:Number = ( event.stageX / slider.width ) * lastVideoData.duration;
-				( parentApplication as WindowContent ).video.seek( seekSecs );
+				switch( which )
+				{
+					case "seekbar":
+						var progressLoc:Number = event.stageX - slider.x;
+						sliderprogress.width = progressLoc;
+						var seekSecs:Number = ( sliderprogress.width / slider.width ) * lastVideoData.duration;
+						( parentApplication as WindowContent ).video.seek( seekSecs );
+						break;
+				}
 			}
 			
 			public function setControlState( control:String, enabled:Boolean ):void
@@ -100,6 +143,11 @@
 							break;
 					}
 				}
+			}
+			
+			public function getCurrentVolume():Number
+			{
+				return volumesliderprogress.width / volume_slider.width;
 			}
 			
 			public function mute():void
@@ -148,9 +196,9 @@
 	</s:Group>
 	
 	<s:Group id="slider" width="100%" height="24" bottom="45"
-			mouseDown="startProgressDrag(event)"
-			mouseMove="doProgressDrag(event)"
-			mouseUp="endProgressDrag(event)"
+			mouseDown="startProgressDrag(event, 'seekbar')"
+			mouseMove="doProgressDrag(event, 'seekbar')"
+			mouseUp="endProgressDrag(event, 'seekbar')"
 			enabled="false"
 			>
 		<s:Rect id="sliderbar" width="100%" height="8" verticalCenter="1">
@@ -170,7 +218,7 @@
 			enabled="false"
 			/>
 	</s:Group>
-	
+
 	<s:HGroup width="100%" bottom="32" verticalAlign="middle" horizontalAlign="center">
 		<mx:Text id="txtState"
 						focusEnabled="false"
@@ -220,6 +268,28 @@
 				imageOver="@Embed(source='../assets/images/mute_over.png')"
 				imageDisabled="@Embed(source='../assets/images/mute_disabled.png')"
 				visible="false"
+				/>
+		</s:Group>
+		<s:Group id="volume_slider" width="100" height="16" left="5" bottom="5"
+			mouseDown="startProgressDrag(event, 'volume')"
+			mouseMove="doProgressDrag(event, 'volume')"
+			mouseUp="endProgressDrag(event, 'volume')"
+			>
+			<s:Rect id="volumesliderbar" width="100%" height="8" verticalCenter="1">
+				<s:fill><s:SolidColor color="0x666666" /></s:fill>
+			</s:Rect>
+			<s:Rect id="volumesliderprogress" width="75" height="8" verticalCenter="1">
+				<s:fill><s:SolidColor color="0x993333" /></s:fill>
+			</s:Rect>
+			<ui:ImageButton id="volumeslidercontrol"
+				x="71"
+				width="8" height="16"
+				skinClass="ui.ImageButtonSkin"
+				image="@Embed(source='../assets/images/volume_slider_normal.png')"
+				imageDown="@Embed(source='../assets/images/volume_slider_down.png')"
+				imageOver="@Embed(source='../assets/images/volume_slider_over.png')"
+				imageDisabled="@Embed(source='../assets/images/volume_slider_disabled.png')"
+				verticalCenter="1"
 				/>
 		</s:Group>
 	</s:HGroup>

@@ -56,6 +56,8 @@
 			private var delayedSeek:Boolean;
 			private var delayedSeekSecs:Number;
 
+			private var isMuted:Boolean;
+			
 			private function init():void
 			{
 				addEventListener(ResizeEvent.RESIZE, onResize);
@@ -217,6 +219,7 @@
 						break;
 					case "NetStream.Seek.Start":
 						loader.visible = true;
+						if ( isMuted ) mute(); else setVolume( ( parentApplication as WindowContent ).playerControls.getCurrentVolume() );
 						break;
 					case "NetStream.Seek.Notify":
 					case "NetStream.Seek.Failed":
@@ -303,11 +306,30 @@
 				return false;
 			}
 			
+			public function setVolume( val:Number ):Boolean
+			{
+				if ( netstream != null )
+				{
+					if ( val < 0 ) val = 0;
+					if ( val > 1.0 ) val = 1.0;
+
+					var st:SoundTransform = new SoundTransform( val );
+					st.pan = mediaPlayer.audioPan;
+					netstream.soundTransform = st;
+					
+					if ( mediaPlayer.muted ) unmute();
+					
+					return true;
+				}
+				return false;
+			}
+			
 			public function unmute():Boolean
 			{
 				if ( mediaPlayer != null && mediaPlayer.media != null && mediaPlayer.muted )
 				{
 					mediaPlayer.muted = false;
+					isMuted = false;
 					return true;
 				}
 				return false;
@@ -318,6 +340,7 @@
 				if ( mediaPlayer != null && mediaPlayer.media != null && !mediaPlayer.muted )
 				{
 					mediaPlayer.muted = true;
+					isMuted = true;
 					return true;
 				}
 				return false;
