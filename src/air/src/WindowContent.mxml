@@ -144,6 +144,7 @@
 					if ( event.keyCode == Keyboard.E ) playerControls.playerSettings.setPan( 1 );
 					
 					if ( event.keyCode == Keyboard.TAB ) toggleBookmarks();
+					if ( event.keyCode == Keyboard.F ) toggleFullscreen();
 					
 					if ( event.keyCode == Keyboard.LEFT ) video.backwards(Main.SKIP_LONG);
 					if ( event.keyCode == Keyboard.RIGHT ) video.forward(Main.SKIP_LONG);
