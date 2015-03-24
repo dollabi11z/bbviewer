@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+	The AppWindow is the content held in each NativeWindow instance. An initial NativeWindow instance
+	is opened from Main - the user can open additional NativeWindow instances from a 'New Window' option.
+	
+	Each AppWindow contains its own instance of ui components, along with variables that are unique to each window.
+-->
 <s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
                xmlns:s="library://ns.adobe.com/flex/spark" 
                xmlns:mx="library://ns.adobe.com/flex/mx"
@@ -7,8 +13,8 @@
 			   creationComplete="init()">
 	
 	<fx:Declarations>
-		<!-- Place non-visual elements (e.g., services, value objects) here -->
 		
+		<!-- The XML for the App menu -->
 		<fx:XMLList id="menuXML">
 			<menu label="File">
 				<item id="newinstance" label="New Window" />
@@ -16,7 +22,6 @@
 				<item id="exit" label="Exit" />
 			</menu>
 			<menu label="View">
-				<item id="ontop" label="Always On Top" type="check" />
 				<item id="sizeSmall" label="Small" />
 				<item id="sizeMed" label="Medium" />
 				<item id="sizeLarge" label="Large" />
@@ -47,32 +52,44 @@
 			import flash.events.MouseEvent;
 			import flash.events.Event;
 			import flash.ui.Mouse;
+			import mx.messaging.channels.StreamingAMFChannel;
+			import objects.AlternateAngleObject;
+			import objects.BookmarkObject;
+			import objects.StreamObject;
+			import objects.VideoDataObject;
+			import org.osmf.events.MediaPlayerStateChangeEvent;
+			import org.osmf.media.MediaPlayerState;
 			
 			import mx.events.ResizeEvent;
 			
-			private static const defaultWindowTitle:String = "BBViewer";
-			private var nativeWindow:ExtendedNativeWindow;
-			private var disableHotkeys:Boolean = false;
-			private var delayHideTimer:Timer;
-			private var disableMouseMove:Boolean;
-			private var hasMouseLeft:Boolean;
+			private static const defaultWindowTitle:String = "BBViewer";	//the window title
+			private var nativeWindow:ExtendedNativeWindow;					//reference to the native window which this is contained in
+			public var disableHotkeys:Boolean = false;						//if dialogs or popups are up, hotkeys will be disabled
+			private var delayHideTimer:Timer;								//timer to help hide ui after a delay
+			private var disableMouseMove:Boolean;							//mouse move is disabled when taking a screenshot
+			private var hasMouseLeft:Boolean;								//check if mouse has left the window
+			
+			//public var activeChannel:Channel;								//the currently active channel
+			[Bindable]
+			public var activeStream:StreamObject;
 			
 			private function init():void
 			{
 				stage.color = 0x000000;
 				
+				//add event listeners for keys and mouse
 				stage.addEventListener( KeyboardEvent.KEY_UP, onKeyUp );
 				stage.addEventListener( MouseEvent.MOUSE_MOVE, onMouseMove );
 				stage.addEventListener( Event.MOUSE_LEAVE, onMouseLeave );
 				
-				//timer for delayed ui hiding
+				//setup the timer for delayed ui hiding
 				delayHideTimer = new Timer( 7000, 1 );
 				delayHideTimer.addEventListener( TimerEvent.TIMER, onDelayHide );
 			}
 			
-			//when mouse is over the window, reset the delay timer
 			private function onMouseMove( event:MouseEvent ):void
 			{
+				//when mouse is over the window, reset the delay timer
 				if ( !disableMouseMove )
 				{
 					showUI();
@@ -82,36 +99,37 @@
 				}
 			}
 			
-			//keep track of when mouse leaves window
 			private function onMouseLeave( event:Event ):void
 			{
+				//keep track of when mouse leaves window
 				hasMouseLeft = true;
 				onDelayHide( null );
 			}
 			
-			//hide the ui after a delay
 			private function onDelayHide( event:TimerEvent ):void
 			{
+				//hide the ui after a delay
 				delayHideTimer.reset();
 				hideUI();
 			}
 			
-			//hides ui elements
 			private function hideUI():void
 			{
+				//hides ui elements
 				appMenu.visible = false;
-				playerControls.visible = false;
+				video_controls.visible = false;
 				if ( Mouse.supportsCursor && !hasMouseLeft ) Mouse.hide();
 			}
 			
-			//shows ui elements
 			private function showUI():void
 			{
-				playerControls.visible = true;
+				//shows ui elements
+				video_controls.visible = true;
 				appMenu.visible = true;
 				if ( Mouse.supportsCursor ) Mouse.show();
 			}
 			
+			//handle any menu item clicks
 			private function onMenuItemClick(event:MenuEvent):void
 			{
 				//File menu
@@ -123,8 +141,6 @@
 				if ( event.item.@id == "sizeMed" ) setFixedSize(480, 270);
 				if ( event.item.@id == "sizeLarge" ) setFixedSize(640, 360);
 				if ( event.item.@id == "sizeFullscreen" ) toggleFullscreen();
-				if ( event.item.@id == "ontop" ) toggleAlwaysOnTop();
-				
 				//Tools menu
 				if ( event.item.@id == "showbookmarks" ) toggleBookmarks();
 				if ( event.item.@id == "showchat" ) toggleChat();
@@ -135,24 +151,113 @@
 			{
 				if ( !disableHotkeys )
 				{
-					if ( event.keyCode == Keyboard.A ) playerControls.playerSettings.toggleAlwaysOnTop();
-					if ( event.keyCode == Keyboard.M ) playerControls.mute();
+					//handle hotkeys (if they aren't currently disabled)
+					if ( event.keyCode == Keyboard.A ) video_controls.playerSettings.toggleAlwaysOnTop();
+					if ( event.keyCode == Keyboard.M ) video_controls.mute();
 					if ( event.keyCode == Keyboard.N ) Main.createNativeWindow( stage.nativeWindow.x - 20, stage.nativeWindow.y - 20 );
-					
-					if ( event.keyCode == Keyboard.Q ) playerControls.playerSettings.setPan( -1 );
-					if ( event.keyCode == Keyboard.W ) playerControls.playerSettings.setPan( 0 );
-					if ( event.keyCode == Keyboard.E ) playerControls.playerSettings.setPan( 1 );
-					
+					if ( event.keyCode == Keyboard.Q ) video_controls.playerSettings.setPan( -1 );
+					if ( event.keyCode == Keyboard.W ) video_controls.playerSettings.setPan( 0 );
+					if ( event.keyCode == Keyboard.E ) video_controls.playerSettings.setPan( 1 );
 					if ( event.keyCode == Keyboard.TAB ) toggleBookmarks();
 					if ( event.keyCode == Keyboard.F ) toggleFullscreen();
-					
 					if ( event.keyCode == Keyboard.LEFT ) video.backwards(Main.SKIP_LONG);
 					if ( event.keyCode == Keyboard.RIGHT ) video.forward(Main.SKIP_LONG);
 					if ( event.keyCode == Keyboard.COMMA ) video.backwards(Main.SKIP_SHORT);
 					if ( event.keyCode == Keyboard.PERIOD ) video.forward(Main.SKIP_SHORT);
-					
 					if ( event.keyCode == Keyboard.SPACE ) video.togglePause();
+					if ( event.keyCode == Keyboard.BACKQUOTE ) toggleDetails();
 				}
+			}
+			
+			public function onPlayerData( data:VideoDataObject ):void
+			{
+				//VideoView passes player data to the AppWindow
+				//Pass this data onto other interested objects
+				video_controls.onData( data );
+				video_controls.playerSettings.onData( data );
+				
+				//allow the current channel to set the players display text 
+				if ( activeStream != null )
+				{
+					video_controls.txtDisplay.text = activeStream.channel.onUpdateDisplayText( activeStream, data );
+					activeStream.player = data;
+				}
+			}
+			
+			public function loadStream( stream:StreamObject ):void
+			{
+				//close channels window
+				if ( channels.visible ) channels.close();
+				
+				//initiate the start of the specified stream
+				activeStream = stream;
+				stream.start();
+				
+				if ( stream.url != null )
+				{
+					//load the stream url
+					Main.logger.log( "Starting Stream: " + stream.url );
+					video.load( stream.url, stream.seek );
+				} else
+				{
+					//No url available
+					Main.logger.log( "Error loading stream: no url available" );
+				}
+				
+				//show angles control button if multipe angles exist
+				Main.logger.log( "   angles: " + stream.angles.length );
+				video_controls.angles.visible = ( stream.angles.length > 0 ) ? true : false;
+				
+				//load stream bookmarks
+				Main.logger.log( "   bookmarks: " + stream.bookmarks.length );
+				bookmarks.updateStream( activeStream );
+
+				//load stream angles
+				video_controls.playerAngles.angleList = stream.angles;
+			}
+			
+			public function loadBookmark( bookmark:BookmarkObject ):void
+			{
+				//close bookmarks window
+				if ( bookmarks.visible ) bookmarks.close();
+
+				//let the channel know we are loading a bookmark
+				activeStream.channel.onLoadBookmark( activeStream, bookmark );
+				
+				if ( activeStream.url != video.activeUrl )
+				{
+					//if a url is specified and it's different from the current stream, load it
+					video.load( activeStream.url, activeStream.seek );
+				} else if ( activeStream.seek > 0 )
+				{
+					//if a seek time is specified, seek to it
+					video.seek( activeStream.seek );
+				}
+				
+			}
+			
+			public function loadAngle( angle:AlternateAngleObject ):void
+			{
+				//close angles chooser
+				if ( video_controls.playerAngles.visible ) video_controls.playerAngles.visible = false;
+				
+				activeStream.channel.onAngleChange( activeStream, angle );
+				if ( activeStream.url != video.activeUrl )
+				{
+					//if a url is specified and it's different from the current stream, load it
+					video.load( activeStream.url, activeStream.seek );
+				} else if ( activeStream.seek > 0 )
+				{
+					//if a seek time is specified, seek to it
+					video.seek( activeStream.seek );
+				}
+				
+			}
+			
+			public function onPlayerStateChange( event:MediaPlayerStateChangeEvent ):void
+			{
+				//pass player state changes to interested children
+				video_controls.onPlayerStateChange( event );
 			}
 			
 			private function setFixedSize(w:Number, h:Number):void
@@ -166,11 +271,13 @@
 
 			public function toggleAlwaysOnTop():void
 			{
+				//toggle always in front option on native window
 				stage.nativeWindow.alwaysInFront = !stage.nativeWindow.alwaysInFront;
 			}
 			
 			public function toggleFullscreen():void
 			{
+				//toggle between fullscreen and windowed mode
 				if (stage.displayState == StageDisplayState.NORMAL)
 				{
 					stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
@@ -182,46 +289,59 @@
 			
 			public function toggleChat():void
 			{
+				//toggle the chat UI
 				chat.visible = !chat.visible;
 			}
 			
 			public function toggleBookmarks():void
 			{
+				//toggle the bookmarks UI
 				bookmarks.visible = !bookmarks.visible;
+				disableHotkeys = true;
+			}
+			
+			public function toggleDetails():void
+			{
+				details.visible = !details.visible;
 			}
 			
 			private function showChannels():void
 			{
+				//show the channels UI
 				channels.visible = true;
+				disableHotkeys = true;
 			}
 			
 			private function showHelp():void
 			{
+				//show the help UI
 				help.visible = true;
 			}
 			
 			private function exitApp():void
 			{
+				//exit the app by closing the native window
 				stage.nativeWindow.close();
 			}
 			
 			public function setWindow(window:ExtendedNativeWindow):void
 			{
-				//update the native window for this window content
+				//update the native window for this AppWindow content
 				nativeWindow = window;
 				nativeWindow.title = defaultWindowTitle;
 			}
 			
 		]]>
 	</fx:Script>
+	
+	<!-- UI Elements -->
 	<local:VideoView id="video" width="100%" height="100%" />
-	<!-- Still a ways to go, just the basic stuff is there -->
+	<ui:Controls id="video_controls" width="100%" bottom="0" />
 	<ui:Chat id="chat" width="33%" height="100%" visible="false" />
-	<ui:Controls id="playerControls" width="100%" bottom="0" />
-	<ui:Help id="help" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<ui:Channels id="channels" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<ui:Bookmarks id="bookmarks" top="30" verticalCenter="1" horizontalCenter="1" visible="false" />
+	<ui:Help id="help" verticalCenter="1" horizontalCenter="1" top="30" visible="false" />
 	<mx:MenuBar x="0" y="0" width="100%" id="appMenu" labelField="@label" itemClick="onMenuItemClick(event)" dataProvider="{menuXML}" />
 	<ui:Message id="messages" width="100%" height="100%" top="30" />
-	
+	<ui:Details id="details" width="350" height="150" top="30" left="5" visible="false" />
 </s:Group>

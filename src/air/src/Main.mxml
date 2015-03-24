@@ -1,4 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+	Main is the initial startup window. Here it is used as a loading screen, and initiates the creation of
+	the first NativeWindow instance that will be used for the application.
+	
+	Main may also contain static objects that are shared across application window instances.
+-->
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
                        xmlns:s="library://ns.adobe.com/flex/spark"
                        xmlns:mx="library://ns.adobe.com/flex/mx"
@@ -26,10 +32,22 @@
             color: #dfdfdf;
         }
 
+		.smallTextDark {
+			fontFamily: UbuntuFont;
+            fontSize: 10;
+            color: #555555;
+        }
+
 		.normalText {
 			fontFamily: UbuntuFont;
             fontSize: 14;
             color: #dfdfdf;
+        }
+		
+		.normalTextDark {
+			fontFamily: UbuntuFont;
+            fontSize: 14;
+            color: #111111;
         }
 	</fx:Style>
 	
@@ -47,8 +65,8 @@
 			import mx.core.Window;
 			import Logger;
 
-			public static const SKIP_SHORT:Number = 15;
-			public static const SKIP_LONG:Number = 60;
+			public static const SKIP_SHORT:Number = 60;
+			public static const SKIP_LONG:Number = 300;
 				
 			public static var logger:Logger;
 			private static const initialWidth:Number = 640;
@@ -58,11 +76,14 @@
 			
 			private function init():void
 			{
+				//setup the logging object
 				logger = new Logger();
+				
+				//place the window
 				nativeWindow.x = ( Capabilities.screenResolutionX / 2 ) - ( nativeWindow.width / 2 );
 				nativeWindow.y = ( Capabilities.screenResolutionY / 2 ) - ( nativeWindow.height / 2 );
 				
-				//load the plugins so they will be available to all windows
+				//load adaptive plugins so they will be available to all windows
 				Helper.loadAdaptivePlugins();
 
 				//launching straight into a new native window tends to cause problems
@@ -72,12 +93,14 @@
 				delayTimer.addEventListener( TimerEvent.TIMER, onDelayComplete );
 				delayTimer.start();
 			}
-			
+						
 			private function onDelayComplete(event:TimerEvent):void
 			{
-				//now we can close this initial window
+				//now we can close this initial loading window
 				delayTimer.stop();
 				close();
+				
+				//and create the application window
 				createNativeWindow( ( Screen.mainScreen.bounds.width - initialWidth) / 2, ( Screen.mainScreen.bounds.height - initialHeight) / 2 );
 			}
 			 
@@ -98,8 +121,8 @@
 				window.stage.scaleMode = StageScaleMode.NO_SCALE;
 				window.stage.align = StageAlign.TOP_LEFT;
 				
-				//* Create an instance of the content for the NativeWindow
-				var content:WindowContent = new WindowContent();
+				//* Create a new AppWindow instnace, and add a reference to the NativeWindow that will contain it
+				var content:AppWindow = new AppWindow();
 				content.setWindow(window);
 				
 				//* Pass the content into the native window

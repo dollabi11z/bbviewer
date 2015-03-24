@@ -29,8 +29,8 @@ package
             
             returnString = now.toLocaleDateString() + " " + now.toLocaleTimeString() + ": ";
             returnString += whatToLog;
-			returnString += "\r\n";
 			trace(returnString);
+			returnString += "r\n";
 			
 			if (isEnabled) writeToFile(returnString);
         }

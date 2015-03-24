@@ -1,3 +1,8 @@
+/*
+ * ExtendedNativeWindow is an extension of NativeWindow so we can handle multiple window instances from our application.
+ * It is the window that will hold the 'AppWindow' instance, and is created automatically when the user requests a
+ * new window.
+ */
 package 
 {
 	import flash.display.NativeWindow;
