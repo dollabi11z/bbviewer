@@ -61,6 +61,7 @@
     <element path="lib\MSAdaptiveStreamingPlugin-v1.0.10-osmf2.0.swc" />
     <element path="lib\AkamaiAdvancedStreamingPlugin-3.4.swc" />
     <element path="lib\as3irclib-0.0.1.swc" />
+    <element path="lib\applicationupdater_ui.swc" />
   </libraryPaths>
   <!-- External Libraries -->
   <externalLibraryPaths>

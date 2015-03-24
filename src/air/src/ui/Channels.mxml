@@ -7,16 +7,15 @@
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
-		<mx:ArrayCollection id="channels">
-			<fx:Object label="Test Video Streams" />
-			<fx:Object label="Big Brother US" />
-			<fx:Object label="Big Brother Canada" />
-		</mx:ArrayCollection>
-
 	</fx:Declarations>
 	
 	<fx:Script>
 		<![CDATA[
+			import channel.Channel;
+			import channel.YouTubeChannel;
+			import objects.ChannelCategory;
+			import ui.ChannelItemRenderer;
+			import channel.RemoteChannel;
 			import flash.display3D.IndexBuffer3D;
 			import mx.collections.ArrayCollection;
 			import spark.events.IndexChangeEvent;
@@ -26,91 +25,110 @@
 			import channel.BBUK;
 			import objects.StreamObject;
 			
-			[ Bindable ] private var channelInterfaces:ArrayCollection = new ArrayCollection();
-			[ Bindable ] private var subs:ArrayCollection = new ArrayCollection();
-			[ Bindable ] private var availableStreams:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var channelList:ArrayCollection = new ArrayCollection();
+			[Bindable]
+			private var currentChannel:Channel;
 			
 			public function init():void
 			{
-				channelInterfaces.addItem( new TestVideos() );
-				loadStreams("Test Video Streams");
+				channelList.addItem( new TestVideos() );
+				loadStreams( ( channelList.getItemAt(0) as Channel).label );
 			}
 			
-			public function loadStreams( channel:String, sub:String = "" ):void
+			public function loadChannelByName( name:String ):Channel
 			{
-				availableStreams.removeAll();
-				for ( var i:Number = 0; i < channelInterfaces.length; i++ )
+				for each( var c:Channel in channelList )
 				{
-					if ( channelInterfaces[i].getChannelName() == channel )
-					{
-						var content:Object = channelInterfaces[i].getContent();
-						
-						//get subs
-						var subid:String = "";
-						subs.removeAll();
-						for each( var subchannel:Object in content.subs )
-						{
-							subs.addItem( { id: subchannel.id, label: subchannel.label } );
-							if ( subchannel.label == sub ) subid = subchannel.id; 
-						}
-						
-						for each( var stream:Object in content.streams )
-						{
-							var item:StreamObject = new StreamObject();
-								item.sub = stream.sub;
-								item.label = stream.label;
-								item.desc = stream.desc;
-								item.url = stream.url;
-								item.resolver = stream.resolver;
-							if ( sub == "" ||  item.sub == subid ) availableStreams.addItem( item );
-						}
-					}
+					if ( c.label.toLowerCase() == name.toLowerCase() )	return c;
 				}
+				return null;
+			}
+			
+			public function loadStreams( channel:String, subId:String = "" ):void
+			{
+				currentChannel = loadChannelByName( channel );
+				currentChannel.filterStreams( subId );
 			}
 			
 			public function onChangeChannel( event:IndexChangeEvent ):void
 			{
-				var selectedRow:Object = event.currentTarget.selectedItem;
+				var selectedRow:Channel = event.currentTarget.selectedItem;
 				loadStreams(selectedRow.label);
 			}
 			
-			public function onChangeSub( event:IndexChangeEvent ):void
+			public function onChangeCategory( event:IndexChangeEvent ):void
 			{
-				var selectedRow:Object = event.currentTarget.selectedItem;
-				loadStreams( channels.getItemAt(cmbChannels.selectedIndex).label, selectedRow.label );
-				trace("loading: " + channels.getItemAt(cmbChannels.selectedIndex).label + " : " + selectedRow.label );
+				var selectedRow:ChannelCategory = event.currentTarget.selectedItem;
+				loadStreams( currentChannel.label, selectedRow.id );
+				Main.logger.log("loading channel: " + currentChannel.label + " sub: " + selectedRow.label );
+			}
+ 
+			private function onAddChannel():void
+			{
+				var name:String = channel_url.text;
+				
+				var new_channel:Channel;
+				if ( name.indexOf("http://") == 0 || name.indexOf( "https://" ) == 0 )
+				{
+					new_channel = new RemoteChannel( name );
+				} else
+				{
+					new_channel = new YouTubeChannel( name );
+				}
+				channel_url.text = "";
+				channelList.addItem( new_channel );
 			}
 			
 			public function close():void
 			{
 				this.visible = false;
+				( parentApplication as AppWindow ).disableHotkeys = false;
 			}
- 
 		]]>
 	</fx:Script>
 	<s:TitleWindow title="Videos" width="100%" height="100%" close="close()">
-		<s:VGroup width="100%" height="100%" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
-			<s:HGroup verticalCenter="1" verticalAlign="middle">
-				<mx:Text text="Channel" />
-				<s:DropDownList id="cmbChannels" width="125" dataProvider="{channels}" selectedIndex="0" change="onChangeChannel(event)" /> 
-				<s:Button label="Add" />
-				<s:Button label="Remove" enabled="false" />
-			</s:HGroup>
-			<s:HGroup verticalCenter="1" verticalAlign="middle">
-				<mx:Text text="Sub" />
-				<s:DropDownList id="cmbSubs" width="125" dataProvider="{subs}" selectedIndex="0" change="onChangeSub(event)" /> 
-			</s:HGroup>
-			<s:List 
-				id="vidcontainer"
-				itemRenderer="ui.StreamItemRenderer"
-				dataProvider="{availableStreams}"
-				verticalScrollPolicy="on"
-				width="100%"
-				height="100%"> 
-				<s:layout>
-					<s:VerticalLayout useVirtualLayout="true" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" />
-				</s:layout>
-			</s:List>
-		</s:VGroup>
+		<s:Group width="100%" height="100%">
+			<s:VGroup width="100%" height="100%" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
+				<s:HGroup verticalCenter="1" verticalAlign="middle">
+					<mx:Text text="Channel" />
+					<s:DropDownList id="cmbChannels" width="125" dataProvider="{channelList}" itemRenderer="ui.ChannelItemRenderer" selectedIndex="0" change="onChangeChannel(event)" /> 
+					<s:Button label="Add" click="{addChannel.visible=true}" />
+					<s:Button label="Remove" enabled="false" />
+				</s:HGroup>
+				<s:HGroup verticalCenter="1" verticalAlign="middle">
+					<mx:Text text="Category" />
+					<s:DropDownList id="cmbCategories" width="125" dataProvider="{currentChannel.categories}" itemRenderer="ui.ChannelCategoryItemRenderer" change="onChangeCategory(event)" /> 
+				</s:HGroup>
+				<s:List
+					id="vidcontainer"
+					itemRenderer="ui.StreamItemRenderer"
+					dataProvider="{currentChannel.filteredStreams}"
+					verticalScrollPolicy="on"
+					width="100%"
+					height="100%"> 
+					<s:layout>
+						<s:VerticalLayout useVirtualLayout="true" paddingTop="5" paddingBottom="5" paddingLeft="5" paddingRight="5" />
+					</s:layout>
+				</s:List>
+			</s:VGroup>
+			<!-- Message box for adding a new channel -->
+			<s:Group id="addChannel" width="50%" verticalCenter="1" horizontalCenter="1" visible="false">
+				<s:Rect width="100%" height="100%">
+					 <s:fill>
+						 <mx:SolidColor color="0xCFCFCF" />
+					 </s:fill>
+					 <s:stroke>
+						<mx:SolidColorStroke color="0x444444" weight="2" />
+					 </s:stroke>
+				</s:Rect>
+				<s:VGroup paddingBottom="15" paddingLeft="15" paddingRight="15" paddingTop="15">
+					<s:Label text="Enter a YouTube Channel name or a channel url:" />
+					<s:TextInput id="channel_url" width="100%" />
+					<s:Button label="Add" click="onAddChannel()" />
+					<s:Button label="Cancel" click="{addChannel.visible=false}" />
+				</s:VGroup>
+			</s:Group>
+		</s:Group>
 	</s:TitleWindow>
 </s:Group>

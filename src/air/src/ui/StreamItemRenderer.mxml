@@ -8,13 +8,15 @@
 	<fx:Script>
 		<![CDATA[
 			import flash.events.Event;
+			import mx.core.Window;
+			import objects.StreamObject;
 
 			private function onStreamClick(event:Event):void
 			{
-				if ( data.url != null ) ( parentApplication as WindowContent ).video.load( data.url );
-				( parentApplication as WindowContent ).channels.close();
+				//start the stream
+				( parentApplication as AppWindow ).loadStream( data as StreamObject );
 			}
-		
+			
 		]]>
 	</fx:Script>
     <s:states> 
