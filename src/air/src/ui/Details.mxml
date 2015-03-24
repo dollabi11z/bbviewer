@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+               xmlns:s="library://ns.adobe.com/flex/spark" 
+               xmlns:mx="library://ns.adobe.com/flex/mx"
+			   xmlns:local="*"
+			   xmlns:ui="ui.*">
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->		
+	</fx:Declarations>
+
+	
+	<fx:Script>
+		<![CDATA[
+			
+		]]>
+	</fx:Script>
+	
+	<!-- Background -->
+	<s:Rect width="100%" height="100%">
+		<s:fill><s:SolidColor color="0x1B1B1B" alpha="0.8" /></s:fill>
+	</s:Rect>
+	
+	<mx:Grid>
+		<mx:GridRow>
+			<mx:GridItem>
+				<s:Label text="Player Url: { parentApplication.activeStream.player.url }" styleName="smallText" />
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow>
+			<mx:GridItem>
+				<s:Label text="Stream Url: { parentApplication.activeStream.url }" styleName="smallText" />
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow>
+			<mx:GridItem>
+				<s:Label text="time/dur: { parentApplication.activeStream.player.currentTime } / { parentApplication.activeStream.player.duration }" styleName="smallText" />
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow>
+			<mx:GridItem>
+				<s:Label text="playing: { parentApplication.activeStream.player.playing }" styleName="smallText" />
+			</mx:GridItem>
+		</mx:GridRow>
+		<mx:GridRow>
+			<mx:GridItem>
+				<s:Label text="auto: { parentApplication.activeStream.player.autoDynamicStreamSwitch }" styleName="smallText" />
+			</mx:GridItem>
+			<mx:GridItem>
+				<s:Label text="dynamic stream: { parentApplication.activeStream.player.currentDynamicStreamIndex } / { parentApplication.activeStream.player.numDynamicStreams } ( { parentApplication.activeStream.player.bitratesForDynamicStreams.getItemAt(parentApplication.activeStream.player.currentDynamicStreamIndex) } )" styleName="smallText" />
+			</mx:GridItem>
+		</mx:GridRow>
+	</mx:Grid>
+
+</s:Group>
