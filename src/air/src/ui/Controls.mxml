@@ -14,10 +14,12 @@
 	<fx:Script>
 		<![CDATA[
 			import flash.events.MouseEvent;
+			import org.osmf.events.MediaPlayerStateChangeEvent;
 			import org.osmf.media.MediaPlayerState;
 			import flash.filters.DropShadowFilter;
 			import flash.events.Event;
 			import objects.VideoDataObject;
+			
 
 			private var sliders:Object = {
 				volume: { isDragging: false },
@@ -35,7 +37,15 @@
 					play.visible = false;
 					pause.visible = true;
 					var maxDistance:Number = ( slider.width - ( slidercontrol.width / 2 ) );
-					sliderprogress.width =  maxDistance * ( data.currentTime / data.duration );
+					var currentDistance:Number = data.currentTime;
+					try
+					{
+						if ( data.isProgressive ) currentDistance += Number( data.url.substr( data.url.indexOf("?start=") + 7, data.url.length ) );
+					} catch ( err:Error ) {}
+					sliderprogress.width =  maxDistance * ( currentDistance / data.duration );
+					//fix problem?
+					if ( sliderprogress.width > stage.stageWidth ) sliderprogress.width = stage.stageWidth;
+					
 					if ( !sliders.seekbar.isDragging && !data.seeking )
 					{
 						//update the slider control location
@@ -46,10 +56,6 @@
 					pause.visible = false;
 					play.visible = true;
 				}
-				//set play time
-				txtState.text = data.displayTime;
-				//check for mute
-				
 			}
 			
 			//handle start drag for custom sliders
@@ -84,7 +90,7 @@
 							volumeslidercontrol.x = progressLoc - ( volumeslidercontrol.width / 2 );
 							
 							//set the new volume
-							( parentApplication as WindowContent ).video.setVolume( getCurrentVolume() );
+							( parentApplication as AppWindow ).video.setVolume( getCurrentVolume() );
 						
 							break;
 						case "seekbar":
@@ -109,12 +115,12 @@
 						var progressLoc:Number = event.stageX - slider.x;
 						sliderprogress.width = progressLoc;
 						var seekSecs:Number = ( sliderprogress.width / slider.width ) * lastVideoData.duration;
-						( parentApplication as WindowContent ).video.seek( seekSecs );
+						( parentApplication as AppWindow ).video.seek( seekSecs );
 						break;
 				}
 			}
 			
-			public function setControlState( control:String, enabled:Boolean ):void
+			private function setControlState( control:String, enabled:Boolean ):void
 			{
 				if ( enabled )
 				{
@@ -152,7 +158,7 @@
 			
 			public function mute():void
 			{
-				if ( ( parentApplication as WindowContent ).video.mute() )
+				if ( ( parentApplication as AppWindow ).video.mute() )
 				{
 					volume.visible = false;
 					volume_mute.visible = true;
@@ -161,7 +167,7 @@
 			
 			public function unmute():void
 			{
-				if ( ( parentApplication as WindowContent ).video.unmute() )
+				if ( ( parentApplication as AppWindow ).video.unmute() )
 				{
 					volume_mute.visible = false;
 					volume.visible = true;
@@ -178,6 +184,21 @@
 				playerSettings.visible = !playerSettings.visible;
 			}
 			
+			public function onPlayerStateChange( event:MediaPlayerStateChangeEvent ):void
+			{
+				switch ( event.state )
+				{
+					case MediaPlayerState.READY:
+						//enable controls when media starts playing
+						setControlState("play", true );
+						setControlState("back", true );
+						setControlState("forward", true );
+						setControlState("jumpback", true );
+						setControlState("jumpforward", true );
+						setControlState("slider", true );
+						break;
+				}
+			}
 		]]>
 	</fx:Script>
 	<!-- Background -->
@@ -220,7 +241,7 @@
 	</s:Group>
 
 	<s:HGroup width="100%" bottom="32" verticalAlign="middle" horizontalAlign="center">
-		<mx:Text id="txtState"
+		<mx:Text id="txtDisplay"
 						focusEnabled="false"
 						selectable="false"
 						text="This is the text"

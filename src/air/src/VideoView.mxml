@@ -10,14 +10,22 @@
 	</fx:Declarations>
 	<fx:Script>
 		<![CDATA[
+			import flash.display.DisplayObject;
 			import flash.events.Event;
 			import flash.events.NetStatusEvent;
+			import flash.events.VideoEvent;
 			import flash.media.Sound;
 			import flash.media.SoundTransform;
 			import flash.net.NetStream;
+			import mx.core.Window;
 			import mx.events.ResizeEvent;
+			import org.osmf.elements.VideoElement;
 			import org.osmf.events.DynamicStreamEvent;
+			import org.osmf.events.MediaElementEvent;
 			import org.osmf.net.NetStreamLoadTrait;
+			import org.osmf.traits.DisplayObjectTrait;
+			import org.osmf.youtube.elements.YouTubeElement;
+			import org.osmf.youtube.traits.YouTubeDisplayObjectTrait;
 			import SimpleLoggerFactory;
 			import org.osmf.logging.Log;
 			import org.osmf.media.MediaPlayer;
@@ -43,19 +51,24 @@
 			import org.openvideoplayer.events.OvpEvent;
 			import org.osmf.media.URLResource;
 			import org.denivip.osmf.net.HLSDynamicStreamingResource;
-
+			import org.osmf.elements.VideoElement;
+				
 			import flash.events.TimerEvent;
 			
 			import objects.VideoDataObject;
 
+			public var activeUrl:String = "";
+			
+			[Bindable]
+			public var mediaPlayer:MediaPlayer;
+			
+			private static const ENABLE_SMOOTHING:Boolean = true;
 			private var mediaContainer:MediaContainer;
-			private var mediaPlayer:MediaPlayer;
 			private var dataTimer:Timer;
 			private var playerData:VideoDataObject = new VideoDataObject();
 			private var netstream:NetStream;
 			private var delayedSeek:Boolean;
 			private var delayedSeekSecs:Number;
-
 			private var isMuted:Boolean;
 			
 			private function init():void
@@ -69,7 +82,6 @@
 				dataTimer = new Timer( 250, 0 );
 				dataTimer.addEventListener( TimerEvent.TIMER, notifyDataListeners );
 				dataTimer.start();
-				
 			}
 			
 			private function wrapup():void
@@ -110,37 +122,28 @@
 			private function onPlayerStateChange( event:MediaPlayerStateChangeEvent ):void
 			{
 				trace( "Player state change" );
+				( parentApplication as AppWindow ).onPlayerStateChange( event );
+				
 				switch( event.state )
 				{
 					case MediaPlayerState.LOADING:
 						trace( "Media loading" );
 						break;
 					case MediaPlayerState.READY:
-						trace( "Media ready" );
-						if ( mediaPlayer != null )
+						onResize(null);
+						if ( mediaPlayer.isDynamicStream )
 						{
-							onResize(null);
-							
-							( parentApplication as WindowContent ).playerControls.setControlState("play", true );
-							( parentApplication as WindowContent ).playerControls.setControlState("back", true );
-							( parentApplication as WindowContent ).playerControls.setControlState("forward", true );
-							( parentApplication as WindowContent ).playerControls.setControlState("jumpback", true );
-							( parentApplication as WindowContent ).playerControls.setControlState("jumpforward", true );
-							( parentApplication as WindowContent ).playerControls.setControlState("slider", true );
-							
-							if ( mediaPlayer.isDynamicStream )
-							{
 
-								trace( "Dynamic Streams:" );
-								playerData.bitratesForDynamicStreams = new Array();
-								for ( var i:Number = 0; i < mediaPlayer.numDynamicStreams; i++ )
-								{
-									playerData.bitratesForDynamicStreams.push( mediaPlayer.getBitrateForDynamicStreamIndex(i) );
-								}
+							trace( "Dynamic Streams:" );
+							playerData.bitratesForDynamicStreams = new Array();
+							for ( var i:Number = 0; i < mediaPlayer.numDynamicStreams; i++ )
+							{
+								playerData.bitratesForDynamicStreams.push( mediaPlayer.getBitrateForDynamicStreamIndex(i) );
 							}
 						}
 						break;
 					case MediaPlayerState.PLAYING:
+						if ( loader.visible ) loader.visible = false;
 						break;
 					case MediaPlayerState.BUFFERING:
 						break;
@@ -176,8 +179,18 @@
 						if ( nsLoadTrait != null )
 						{
 							netstream = nsLoadTrait.netStream;
+							
 							addNetStreamListeners();
 						}
+						/*
+						if ( mediaPlayer.media.hasTrait( MediaTraitType.DISPLAY_OBJECT ) )
+						{
+							trace("*********** resizing display object *****************");
+							var displayTrait:YouTubeDisplayObjectTrait = mediaPlayer.media.getTrait(MediaTraitType.DISPLAY_OBJECT) as YouTubeDisplayObjectTrait;
+							displayTrait.displayObject.width = videoContainer.width;
+							displayTrait.displayObject.height = videoContainer.height;
+						}
+						*/
 						break;
 					case LoadState.LOADING:
 						loader.visible = true;
@@ -212,6 +225,7 @@
 						if ( delayedSeek )
 						{
 							Main.logger.log( "Processing delayed seek: " + delayedSeekSecs );
+							//if ( netstream != null ) netstream.seek( delayedSeekSecs );
 							seek( delayedSeekSecs );
 							delayedSeek = false;
 							delayedSeekSecs = 0;
@@ -219,7 +233,7 @@
 						break;
 					case "NetStream.Seek.Start":
 						loader.visible = true;
-						if ( isMuted ) mute(); else setVolume( ( parentApplication as WindowContent ).playerControls.getCurrentVolume() );
+						if ( isMuted ) mute(); else setVolume( ( parentApplication as AppWindow ).video_controls.getCurrentVolume() );
 						break;
 					case "NetStream.Seek.Notify":
 					case "NetStream.Seek.Failed":
@@ -248,7 +262,7 @@
 				{
 					var media:StreamingURLResource = new StreamingURLResource( url, StreamType.LIVE_OR_RECORDED );
 					mediaElement = ( Helper.pluginFactory.yt as DefaultMediaFactory ).createMediaElement( media );
-				} else if ( url.indexOf(".f4m") > 0 || url.indexOf(".smil") > 0 || url.indexOf(".flv") > 0 )
+				} else if ( url.indexOf(".f4m") > 0 || url.indexOf(".mp4") > 0 || url.indexOf(".smil") > 0 || url.indexOf(".flv") > 0 )
 				{
 					//load hds
 					trace( "loading Adobe HDS url" );
@@ -280,9 +294,27 @@
 					mediaElement.addMetadata( LayoutMetadata.LAYOUT_NAMESPACE, layout );
 					
 					mediaPlayer.media = mediaElement;
+					if ( ENABLE_SMOOTHING ) mediaPlayer.media.addEventListener(MediaElementEvent.TRAIT_ADD, onTraitAdded);
 					mediaContainer.addMediaElement( mediaElement );
 				}
+				activeUrl = url;
 			}
+			
+			private function onTraitAdded( event:MediaElementEvent ):void
+			{
+				if ( event.traitType == MediaTraitType.DISPLAY_OBJECT )
+				{
+					try
+					{
+						var displayobject:Object = ( mediaPlayer.media.getTrait( MediaTraitType.DISPLAY_OBJECT ) as DisplayObjectTrait ).displayObject;
+						if ( displayobject.smoothing != null ) displayobject.smoothing = true;
+					} catch ( err:Error )
+					{
+						Main.logger.log( "Error: smoothing could not be enabled for this stream" );
+					}
+				}
+			}
+			
 			
 			public function onResize( event:Event ):void
 			{
@@ -317,8 +349,7 @@
 					st.pan = mediaPlayer.audioPan;
 					netstream.soundTransform = st;
 					
-					if ( mediaPlayer.muted ) unmute();
-					
+					if ( mediaPlayer.muted ) ( parentApplication as AppWindow ).video_controls.unmute();
 					return true;
 				}
 				return false;
@@ -348,17 +379,27 @@
 			
 			public function seek( toSecs:Number ):void
 			{
-				if ( mediaPlayer != null && mediaPlayer.media != null && mediaPlayer.canSeek ) mediaPlayer.seek( toSecs );
+				if ( activeUrl.indexOf(".mp4") > 0 )
+				{
+					//try to seek for progressive
+					trace("************* progressive seek ************");
+					var progressive:String = activeUrl.substr( 0, activeUrl.indexOf("?start=") ) + "?start=" + toSecs;
+					load( progressive );
+				} else
+				{
+					if ( netstream != null ) netstream.seek( toSecs );
+					//if ( mediaPlayer != null && mediaPlayer.canSeek ) mediaPlayer.seek( toSecs );
+				}
 			}
 			
 			public function backwards( secs:Number ):void
 			{
-				if ( mediaPlayer != null && mediaPlayer.media != null && mediaPlayer.canSeek ) mediaPlayer.seek( mediaPlayer.currentTime - secs );
+				seek( mediaPlayer.currentTime - secs );
 			}
 			
 			public function forward( secs:Number ):void
 			{
-				if ( mediaPlayer != null && mediaPlayer.media != null && mediaPlayer.canSeek ) mediaPlayer.seek( mediaPlayer.currentTime + secs );
+				seek( mediaPlayer.currentTime + secs );
 			}
 			
 			public function pause():void
@@ -395,6 +436,8 @@
 			//we send video data to interested listeners every second
 			private function notifyDataListeners( event:TimerEvent ):void
 			{
+				playerData.url = activeUrl;
+				playerData.isProgressive = ( activeUrl.indexOf(".mp4") > 0 ) ? true : false;
 				playerData.playing = mediaPlayer.playing;
 				playerData.seeking = mediaPlayer.seeking;
 				playerData.paused = mediaPlayer.paused;
@@ -407,9 +450,7 @@
 				playerData.autoDynamicStreamSwitch = mediaPlayer.autoDynamicStreamSwitch;
 				playerData.currentDynamicStreamIndex = mediaPlayer.currentDynamicStreamIndex;
 				playerData.numDynamicStreams = mediaPlayer.numDynamicStreams;
-				
-				( parentApplication as WindowContent ).playerControls.onData( playerData );
-				( parentApplication as WindowContent ).playerControls.playerSettings.onData( playerData );
+				( parentApplication as AppWindow ).onPlayerData( playerData );
 			}
 			
 		]]>
