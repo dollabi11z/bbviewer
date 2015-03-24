@@ -12,7 +12,10 @@
 	
 	<fx:Script>
 		<![CDATA[
+			import mx.collections.ArrayCollection;
 			
+			[Bindable]
+			public var angleList:ArrayCollection = new ArrayCollection();
 		]]>
 	</fx:Script>
 
@@ -22,11 +25,12 @@
 	</s:Rect>
 	
 	<!-- Alternate Camera controls -->
-	<s:VGroup gap="2" paddingTop="10" paddingBottom="10" paddingLeft="10" paddingRight="10">
-		<mx:Text text="Cam 1" styleName="smallText" selectable="false" />
-		<mx:Text text="Cam 2" styleName="smallText" selectable="false" />
-		<mx:Text text="Cam 3" styleName="smallText" selectable="false" />
-		<mx:Text text="Cam 4" styleName="smallText" selectable="false" />
-		<mx:Text text="Quad Cam" styleName="smallText" selectable="false" />
-	</s:VGroup>
+	<s:Group>
+		<s:Rect>
+			<s:fill>
+				<mx:SolidColor color="0x1B1B1B" />
+			</s:fill>
+		</s:Rect>
+		<s:List id="angles" contentBackgroundAlpha="0.0" dataProvider="{ angleList }" itemRenderer="ui.AlternateAngleItemRenderer" />
+	</s:Group>
 </s:Group>
