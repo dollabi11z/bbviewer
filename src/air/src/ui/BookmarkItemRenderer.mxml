@@ -4,16 +4,16 @@
     xmlns:mx="library://ns.adobe.com/flex/mx" 
     xmlns:s="library://ns.adobe.com/flex/spark"
 	width="100%"
-	click="onFlashbackClick(event)" >
+	click="onBookmarkClick(event)" >
 	<fx:Script>
 		<![CDATA[
 			import flash.events.Event;
+			import objects.BookmarkObject;
 
-			private function onFlashbackClick(event:Event):void
+			private function onBookmarkClick(event:Event):void
 			{
-				//TODO if already playing this url, we should't reload it
-				if ( data.url != null ) ( parentApplication as WindowContent ).video.load( data.url, data.seek );
-				( parentApplication as WindowContent ).bookmarks.close();
+				//load the bookmark
+				( parentApplication as AppWindow ).loadBookmark( data as BookmarkObject );
 			}
 		
 		]]>
@@ -22,7 +22,8 @@
         <s:State name="normal"/> 
         <s:State name="hovered"/> 
     </s:states> 
-    <s:VGroup verticalCenter="1">
-		<s:Label id="flashbackLabel" height="16" text="{data.label}" verticalAlign="middle" /> 
+    <s:VGroup verticalCenter="1" paddingBottom="3" paddingLeft="3" paddingRight="3" paddingTop="3">
+		<s:Label id="flashbackLabel" text="{data.label}" styleName="normalTextDark" verticalAlign="middle" /> 
+		<s:Label id="flashbackDetails" text="{data.desc}" styleName="smallTextDark" verticalAlign="middle" /> 
 	</s:VGroup>
 </s:ItemRenderer>

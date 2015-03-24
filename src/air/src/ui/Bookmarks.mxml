@@ -7,33 +7,63 @@
 	
 	<fx:Declarations>
 		<!-- Place non-visual elements (e.g., services, value objects) here -->
-		<mx:ArrayCollection id="currentBookmarks">
-			<fx:Object label="Big Buck Bunny ( seek 60 )" url="http://wams.edgesuite.net/media/MPTExpressionData02/BigBuckBunny_1080p24_IYUV_2ch.ism/manifest(format=mpd-time-csf)" seek="60" />
-		</mx:ArrayCollection>
-
 	</fx:Declarations>
 	
 	<fx:Script>
 		<![CDATA[
 			import mx.collections.ArrayCollection;
+			import objects.BookmarkObject;
+			import objects.StreamObject;
 			
+			[Bindable]
+			public var bookmarkStream:StreamObject;
+				
 			public function init():void
 			{
 				
+			}
+			private function filterResults():void
+			{
+				//update the data providers filter function
+				if ( filterText.text.length > 0 )
+				{
+					bookmarkStream.bookmarks.filterFunction = filterRows;
+				} else
+				{
+					bookmarkStream.bookmarks.filterFunction = null;
+				}
+				bookmarkStream.bookmarks.refresh();
+			}
+			
+			private function filterRows(item:Object):Boolean
+			{
+				if ((item["label"] as String).toUpperCase().indexOf((filterText.text as String).toUpperCase()) > -1) return true;
+				return false;
+			}
+
+			public function updateStream( stream:StreamObject ):void
+			{
+				bookmarkStream = stream;
 			}
 			
 			public function close():void
 			{
 				this.visible = false;
+				( parentApplication as AppWindow ).disableHotkeys = false;
 			}
 		]]>
 	</fx:Script>
 	<s:TitleWindow title="Bookmarks" width="100%" height="100%" close="close()">
 		<s:VGroup width="100%" height="100%" paddingLeft="5" paddingRight="5" paddingTop="5" paddingBottom="5">
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:DropDownList id="cmbBookmarkSets" width="125" /> 
+				<s:Label text="Find: " />
+				<s:TextInput id="filterText" change="filterResults()" width="50%" />
+			</s:HGroup>
 			<s:List
 				id="bookmarks"
 				itemRenderer="ui.BookmarkItemRenderer"
-				dataProvider="{currentBookmarks}"
+				dataProvider="{ bookmarkStream.bookmarks }"
 				verticalScrollPolicy="on"
 				width="100%"
 				height="100%"> 
